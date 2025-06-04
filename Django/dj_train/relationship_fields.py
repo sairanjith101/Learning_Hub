@@ -37,9 +37,11 @@ class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     joined_at = models.DateField(auto_now_add=True)
 
+# views Query
 
 from .models import Student
 
 joined_student = Student.objects.filter(enrollment__isnull=False).distinct()
 
 not_joined_student = Student.objects.filter(enrollment__isnull=True)
+
