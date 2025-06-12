@@ -1,31 +1,26 @@
-from django.db import models
+from .models import Student
 
-class Student(models.Model):
-    name = models.CharField(max_length=50)
+# get all
+student = Student.objects.all()
 
-class Course(models.Model):
-    title = models.CharField(max_length=50)
-    student = models.OneToOneField(Student, on_delete=models.CASCADE)
+# get one
+student = Student.objects.get(id=1)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# filter
+student = Student.objects.filter(age__gte=18)
 
-class Student(models.Model):
-    name = models.CharField(max_length=50)
+# orderby
+student = Student.objects.order_by('name')
 
-class Course(models.Model):
-    title = models.CharField(max_length=50)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+# update
+student = student.objects.get(id=1)
+student.name = "Raj"
+student.save()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+student = Student.objects.filter(id=1).update(name="Raj")
 
-class Student(models.Model):
-    name = models.CharField(max_length=50)
+# delete
+student = student.objects.get(id=1)
+student.delete()
 
-class Course(models.Model):
-    title = models.CharField(max_length=50)
-    student = models.ManyToManyField('Student', through='Entrolment')
-
-class Entrolment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    joined_date = models.DateTimeField(auto_now_add=True)
+student = Student.objects.filter(id=1).delete()
