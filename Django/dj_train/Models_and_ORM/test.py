@@ -1,26 +1,34 @@
-from .models import Student
+from myapp.models import Student
 
-# get all
+# create
+
+student = Student(name = 'Ravi', age = 20)
+student.save()
+
+student = Student.objects.create(name='Ravi', age=20)
+
+# read
+
 student = Student.objects.all()
 
-# get one
-student = Student.objects.get(id=1)
+student = Student.objects.get(id=id)
 
-# filter
-student = Student.objects.filter(age__gte=18)
+student = Student.objects.filter(age__gte=8)
 
-# orderby
 student = Student.objects.order_by('name')
 
 # update
-student = student.objects.get(id=1)
+
+student = Student.objects.get(id=id)
 student.name = "Raj"
 student.save()
 
-student = Student.objects.filter(id=1).update(name="Raj")
+student = Student.objects.filter(id=id).update(name="Raj")
+
 
 # delete
-student = student.objects.get(id=1)
+
+student = Student.objects.get(id=id)
 student.delete()
 
-student = Student.objects.filter(id=1).delete()
+student = Student.objects.filter(id=id).delete()
