@@ -121,3 +121,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Add this for login-required pages to work properly
+LOGIN_URL = '/Blog/login/'
+LOGIN_REDIRECT_URL = '/Blog/posts/'
+LOGOUT_REDIRECT_URL = '/Blog/login/'
