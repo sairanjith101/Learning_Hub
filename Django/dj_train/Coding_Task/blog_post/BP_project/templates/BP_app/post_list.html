@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Post</title>
+  </head>
+  <body>
+    <h1>Blog Post List</h1>
+    <ul>
+      {% for post in posts %}
+      <li>
+        <strong>{{post.title}}</strong> by {{post.author.username}} <br />
+        {{post.created_at|date:"F j, Y, g:i a"}} <br />
+        {{post.body|truncatewords:20}}
+      </li>
+      {% empty %}
+      <li>No blog post available.</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
+
+<!-- {{ post.created_at }}: Displays the date and time the post was created.
+
+|date:"F j, Y, g:i a": This is a date filter. It formats the date.
+
+F – full month name (e.g., June)
+
+j – day without zero padding (e.g., 25)
+
+Y – full year (e.g., 2025)
+
+g – hour (1–12)
+
+i – minutes
+
+a – am/pm
+
+Example output: June 25, 2025, 3:15 pm
+
+|truncatewords:20: Limits it to the first 20 words.
+
+-->
