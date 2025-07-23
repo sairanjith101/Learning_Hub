@@ -12,3 +12,6 @@ class Solution:
 
 sol = Solution()
 print(sol.NestedList(nested_list))
+
+
+
