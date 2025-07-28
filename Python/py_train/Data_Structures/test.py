@@ -1,13 +1,13 @@
 class Solution:
-    def findduplicate(self, nums):
+    def sortlistoftuple(self, tuples):
+        my_dict = dict(tuples)
         output = []
-        duplicate = []
-        for i in nums:
-            if i not in output:
-                output.append(i)
-            else:
-                duplicate.append(i)
-        return duplicate 
-nums = [4,3,2,7,8,2,3,1]
+        for key,values in my_dict.items():
+            sort_value = values.sort()
+            if sort_value:
+                output.append(tuples)
+        return output
+
+tuples = [(1, 3), (3, 2), (2, 1)]
 sol = Solution()
-print(sol.findduplicate(nums))
+print(sol.sortlistoftuple(tuples))
