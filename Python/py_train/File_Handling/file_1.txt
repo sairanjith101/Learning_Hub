@@ -1,0 +1,2 @@
+Hello LeetCode!
+Welcome to file handling in Python.

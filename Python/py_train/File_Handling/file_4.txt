@@ -1,0 +1,2 @@
+Hello from LeetCode!
+Python is fun.
