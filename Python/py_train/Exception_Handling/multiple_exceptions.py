@@ -5,13 +5,14 @@ class Solution:
             b = float(b)
             return a / b
         except ZeroDivisionError:
-            return "Division by zero error"
+            return "Error: Division by zero is not allowed."
         except ValueError:
-            return "Invalid input: Please enter numbers only"
+            return "Error: Invalid input. Please enter numeric values only."
         finally:
-            print("Calculation attempt complete")
+            print("Calculation attempt complete.")
 
-a = input("Enter a value A: ")
-b = input("Enter a value B: ")
+# User input
+a = input("Enter value A: ")
+b = input("Enter value B: ")
 sol = Solution()
 print(sol.mul_exception(a, b))
