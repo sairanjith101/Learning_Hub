@@ -1,9 +1,74 @@
+👉 1. Start with definitions
+--- Authentication is the process of verifying the identity of a user (ex: username & password, OTP, JWT token).
+--- Authorization is the process of checking what resources or actions the authenticated user is allowed to access (ex: admin can add users, normal user cannot).
+
+👉 2. Give real-world example
+--- Authentication → Logging into Gmail with email & password.
+--- Authorization → After login, only you can see your mails, not others’.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --- Django → the web framework (core).
 --- DRF → builds APIs on top of Django.
 --- simplejwt → Its a package adds secure JWT authentication for those APIs.
 --- PyMySQL → connects Django to a MySQL database.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+JWT:
 
+--- JWT stands for JSON Web Token.
+--- It’s a compact, self-contained token used for authentication between client and server.
+--- It has three parts — header, payload, and signature.
+--- After login, the server issues a JWT, and the client sends it with each request.
+(👉 "User login ஆன பிறகு, server ஒரு JWT token குடுக்கும். அதுக்குப் பிறகு, client ஒவ்வொரு request அனுப்பும் போதும் அந்த JWT token-ஐ சேர்த்து server-க்கு அனுப்பும்.")
+--- Since it is stateless, the server doesn’t need to store sessions, which makes it scalable and fast.
+
+✅ (If they want more)
+--- The header defines algorithm, payload has user info and expiry, and the signature ensures the token is not tampered.
+
+✅ What is the meaning of compact in coding?
+--- In coding, compact means writing code or data in a shorter, claener and memory-efficent way.
+
+✅ What is the meaning of self-contained token in coding?
+--- A self-contained token is a token(like a JWT) that holds all the required user information inside itself,
+--- so the server doesn't need to look it up in a database.
+
+✅ What is the meaning of stateless in coding?
+--- Statelessn in coding means the server does not remember any information about the client between request.
+--- each request is independent.
+
+✅ What is the meaning of session in coding?
+--- A session is a way to store user data on the server(like login info) so it can be used accross multiple requests.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 Structure:
+xxxxx.yyyyy.zzzzz → Header.Payload.Signature
+
+--- Header → algorithm & token type (ex: HS256).
+--- Payload → user info + claims (ex: user id, role, expiry time).
+--- Signature → ensures token is not tampered (generated using secret key).
+
+🔹 Important
+
+--- Header and Payload in JWT are Base64-encoded JSON.
+--- Signature is also Base64-encoded, but it’s generated using hashing + secret key.
+--- Anyone can decode Header & Payload, but only the server (with secret key) can verify Signature.
+
+👉 In short:
+
+--- Header + Payload = message
+--- Signature = seal 🔒 with server’s secret key
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔹 Q: “What is Base64 and why does JWT use it?”
+
+--- Base64 is an encoding scheme that converts data into a text format using only A–Z, a–z, 0–9, +, /.
+--- It’s not encryption, just a safe way to represent data in text.
+--- JWT uses Base64 to encode the header and payload so they can be safely sent in HTTP headers.
+
+✅ (If they dig deeper)
+--- Anyone can decode Base64, but the signature ensures the JWT cannot be tampered with.
+
+⚡ Quick analogy:
+--- Base64 = Writing something in English → but instead of letters, you map it into a fixed alphabet system → machine-readable.
+--- Not secret, just transport-friendly.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 1. CREATE DATABASE nexora CHARACTER SET utf8mb4;
 
 --- What it does: Creates a new database named nexora.
