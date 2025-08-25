@@ -1,0 +1,124 @@
+--- Django → the web framework (core).
+--- DRF → builds APIs on top of Django.
+--- simplejwt → Its a package adds secure JWT authentication for those APIs.
+--- PyMySQL → connects Django to a MySQL database.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. CREATE DATABASE nexora CHARACTER SET utf8mb4;
+
+--- What it does: Creates a new database named nexora.
+--- CHARACTER SET utf8mb4:
+--- Tells MySQL to use the utf8mb4 encoding, which is the modern and recommended choice.
+--- It supports all Unicode characters, including emojis (😀🔥💯), unlike utf8 which is limited.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2. CREATE USER 'nexora_user'@'%' IDENTIFIED BY 'StrongPassword123!';
+
+--- What it does: Creates a new database user called nexora_user.
+--- '%': The % means this user can connect from any host (not just localhost).
+--- If you only want local access, you’d use 'nexora_user'@'localhost'.
+--- IDENTIFIED BY 'StrongPassword123!': Sets the user’s password to StrongPassword123!.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3. GRANT ALL PRIVILEGES ON nexora.* TO 'nexora_user'@'%';
+
+--- What it does: Gives the user all permissions (create tables, insert, update, delete, etc.) on the nexora database.
+--- nexora.*: Means "all tables inside the nexora database".
+--- To 'nexora_user'@'%': Grants those rights specifically to the user you just created.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+4. FLUSH PRIVILEGES;
+
+--- What it does: Refreshes MySQL’s memory of users and privileges.
+--- Without this, MySQL might not immediately recognize the new user/permissions until restart.
+--- Think of it as "apply the changes now".
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In Database connect in Django (settings.py):
+
+--- 'OPTIONS': { 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'", }
+--- OPTIONS → Django oda DB connection-ku extra config.
+--- init_command → Connection aana udane oru SQL command run panna.
+--- STRICT_TRANS_TABLES → Safe mode ahh enable pannidum → invalid data DB la sneak in aagave koodadhu.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+JWT tokens:
+
+--- Access token valid for 60 minutes.
+--- Refresh token valid for 7 days.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) class User(AbstractUser):
+
+--- AbstractUser = Django oda built-in User (username, email, password irukkum).
+--- Neenga extend pannitu extra fields add pannuringa (role, phone, address).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2) class Roles(models.TextChoices):
+
+--- Idhu oru enum (options list).
+--- ADMIN = 'ADMIN', 'Admin' →
+--- 'ADMIN' DB la save aagum.
+--- 'Admin' UI la kaattum.
+--- So, role oda possible values = ADMIN, SELLER, CUSTOMER.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3) role = models.CharField(...)
+
+--- Role nu oru field create pannuringa.
+--- choices=Roles.choices → dropdown maari 3 option mattum select panna mudiyum.
+--- default=Roles.CUSTOMER → pudhusaa user create pannumbodhu role = Customer automatically set aagum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+@admin.register(User)
+class UserAdmin(DjangoUserAdmin):
+
+--- @admin.register(User) = admin.site.register(User, UserAdmin) shortcut.
+--- UserAdmin inherits DjangoUserAdmin, so default user admin behaviour keep pannittu namma changes add pannalam.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Imports & setup:
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from rest_framework import serializers
+
+User = get_user_model()
+
+--- get_user_model() → neenga define pannirukkura custom User model-a fetch pannum (hard-coded import avoid agum).
+--- validate_password → Django built-in password strength checks (length, common password, etc.).
+--- DRF serializers → JSON <-> Python conversion + validation.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+RegisterSerializer:
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+    role = serializers.ChoiceField(choices=User.Roles.choices, default=User.Roles.CUSTOMER)
+
+--- ModelSerializer → auto fields + model-based save.
+--- password → write_only=True → response la varadhu (safety).
+--- required=True → must send during register.
+--- role → ChoiceField → ADMIN/SELLER/CUSTOMER mattum allow.
+--- default=CUSTOMER → user specify pannalana default-aa Customer.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+📌 Error summary:
+
+RuntimeError: 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+Cause:
+
+--- Your MySQL server user (nexora_user) is using the default authentication plugin caching_sha2_password.
+--- But your Python MySQL driver (PyMySQL) cannot handle it without the cryptography package.
+
+✅ Solution (two options)
+Option 1: Install cryptography
+
+--- In your venv, run:
+
+pip install cryptography
+
+--- Then try again:
+
+python manage.py makemigrations
+python manage.py migrate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

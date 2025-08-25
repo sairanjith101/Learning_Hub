@@ -80,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'nexora',
         'USER': 'nexora_user',
-        'PASSWORD': 'Nexora@123!',
+        'PASSWORD': 'Nexora@123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
