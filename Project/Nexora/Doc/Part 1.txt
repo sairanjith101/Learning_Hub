@@ -298,3 +298,158 @@ Example:
 
 --- இதனால API-க்கு அந்த புதிய user data response-ஆக கிடைக்கும் (password காட்டாமல்).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+views.py
+
+--- RegisterView → anyone can POST செய்து புதிய user create பண்ணலாம்.
+--- MeView → login ஆன user தான் /auth/me/ மூலம் தன் profile-ஐ GET/UPDATE பண்ணலாம்.
+
+--- get_user_model() → project-ல define பண்ணிய custom User model (அல்லது default User) எதையோ எடுத்து தரும். இதனால் future-ல User model மாற்றினாலும் code break ஆகாது.
+
+--- generics → DRF-ல common CRUD views ready-made. நீங்க minimal code-ல் endpoints build பண்ண முடியும்.
+--- permissions → யாருக்கு access கொடுக்கணும் (AllowAny vs IsAuthenticated) control பண்ண.
+--- CreateAPIView → POST request வந்தா புதிய object create பண்ணும் (இங்க உங்க User).
+--- queryset → DRF-க்கு base queryset. (Create-க்கு mostly பயன்படுத்தது serializer.save() தான்; ஆனாலும் DRF சில இடங்களில் use பண்றது.)
+--- serializer_class = RegisterSerializer → form-மாதிரி வேலை செய்யும். validate பண்ணி, create()-ல User.objects.create_user(...) என்று password-ஐ hash பண்ணி சேமிக்கணும் (ப்ளெயின் டெக்ஸ்ட்-ஆ save பண்ணக் கூடாது!).
+
+--- permission_classes = AllowAny → யாரும் (login இல்லாமே) register செய்யலாம்.
+--- RetrieveUpdateAPIView → GET (தன் profile-ஐ retrieve) மற்றும் PUT/PATCH (update) support.
+
+--- IsAuthenticated → login ஆனவங்க மட்டும் access பண்ண முடியும்.
+--- get_object() → எந்த user object-ஐ எடுத்துப் பண்றது? → request.user (அதாவது தற்போது login ஆன user).
+--- இதனால் /auth/me/-ல id pass பண்ணணும்-ன்னு தேவையில்லை. “நான்” யார்-னு server-க்கு தெரியும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Why GenericAPIView is better?
+
+--- Less code (boilerplate avoid)
+--- Consistency (error handling, status codes DRF standard போல வரும்)
+--- Flexibility (எதாவது customize பண்ணணும்-னா override methods like perform_create, get_queryset, get_object)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Client side (browser / mobile app):
+
+--- Request & Response → JSON format
+--- Because network-la communicate panna standard format JSON.
+
+Server side (Django/DRF + DB):
+
+--- JSON → Python objects (dict / model instances) → ORM query → DB rows
+--- DB la Python data store aagathu, SQL table-oda rows & columns save aagum.
+--- Later DB-la irundhu record fetch pannumbodhu → Python objects → JSON convert pannitu client-ku send pannum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🔄 Full Cycle
+
+--- Client → JSON request
+--- Example Request:
+
+{
+  "username": "ram",
+  "email": "ram@example.com"
+}
+
+
+--- Server → Python world
+--- JSON → Python dict
+--- Serializer validate pannum
+--- ORM model (User instance) create/update pannum
+--- ORM → SQL query → DB row save
+--- Response → JSON
+--- DB record fetch → Python object → Serializer serialize → JSON
+--- Return to client
+Example Response:
+
+{
+  "id": 1,
+  "username": "ram",
+  "email": "ram@example.com"
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Serializer-oda role
+
+--- Serializer-oda main job:
+--- Validate (JSON → Python dict)
+--- Transform (Python object ↔ JSON)
+--- Save logic (create/update DB records)
+--- But serializer itself request/response handle pannaathu.
+--- It won’t know:
+--- User GET ku vandhacha? POST ku vandhacha?
+--- Yaaru permission kidaikkum?
+--- Status code 200 ah? 201 ah? 400 ah?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2. View-oda role
+
+--- View is the controller:
+--- Client request type (GET/POST/PATCH/DELETE) decide pannum → CRUD decide pannum
+--- Correct serializer call pannum
+--- Permission check pannum (IsAuthenticated, AllowAny, etc.)
+--- Response object build pannum (Response(serializer.data, status=201))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+📝 Short answer
+
+--- Request & Response → View handle pannum
+--- Serializer → just data validation + conversion
+--- DB → actual storage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. GenericAPIView
+
+from rest_framework import generics
+
+--- GenericAPIView-oda ready-made subclasses.
+--- CRUD operations (Create, Retrieve, Update, Delete) common-ah irukkura code DRF already implement panniduchu.
+
+Examples:
+
+--- generics.CreateAPIView → POST (create new object) handle pannum
+--- generics.RetrieveAPIView → GET (single object fetch) handle pannum
+--- generics.UpdateAPIView → PUT/PATCH (update) handle pannum
+--- generics.DestroyAPIView → DELETE handle pannum
+--- generics.RetrieveUpdateAPIView → GET + PUT/PATCH
+--- generics.RetrieveUpdateDestroyAPIView → GET + PUT/PATCH + DELETE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2. permissions
+
+from rest_framework import permissions
+
+--- யாருக்கு இந்த view access பண்ண முடியும்னு control pannum.
+--- permission_classes என்ற variable set pannalaam.
+
+Common permissions:
+
+--- permissions.AllowAny → யாரும் (login இல்லாம) access panna mudiyum.
+--- permissions.IsAuthenticated → login ஆன user மட்டும் access panna mudiyum.
+--- permissions.IsAdminUser → admin/staff மட்டும் access panna mudiyum.
+--- Custom permission class kooda create pannalaam (உதா: “owner only”).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3. Response
+
+from rest_framework.response import Response
+
+--- இது தான் final-ah client-க்கு data return பண்ணுறது.
+--- Python dict/serializer data pass panninaa, DRF அதை JSON-ஆ convert பண்ணி send pannum.
+
+Example:
+
+return Response({"message": "User created"}, status=201)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--- generics → ready-made CRUD class views (easy, less code).
+
+--- permissions → யாருக்கு இந்த API access கொடுக்கணும்னு control.
+
+--- Response → final output JSON format-la client-க்கு return pannum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+📝 Short Summary
+
+--- User → The model class (DB table definition).
+--- request.user → The actual logged-in user instance for the current request.
+--- In get_object() → we need “which object to retrieve/update?” → that is the logged-in user only → so we return self.request.user.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
