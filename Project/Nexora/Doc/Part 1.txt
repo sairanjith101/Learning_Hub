@@ -453,3 +453,41 @@ return Response({"message": "User created"}, status=201)
 --- request.user → The actual logged-in user instance for the current request.
 --- In get_object() → we need “which object to retrieve/update?” → that is the logged-in user only → so we return self.request.user.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🔑 1. Why use TokenObtainPairView & TokenRefreshView?
+
+--- TokenObtainPairView → username/password kuduthaa access + refresh token pair return pannum.
+
+--- Access token = short-life (5 min default).
+--- Refresh token = long-life (1 day default).
+
+--- TokenRefreshView → refresh token kuduthu pudhusa access token vaangalaam.
+👉 இதனால login/refresh JWT token cycle ready-made-ஆ கிடைக்குது.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+rest_framework_simplejwt.views import additionals list
+
+--- TokenVerifyView - Purpose: Oru token valid-ஆ இல்லையா check பண்ண.
+--- TokenBlacklistView (if blacklisting enabled in settings) - Purpose: Logout செய்யும்போது refresh token-ஐ blacklist பண்ண.
+--- TokenObtainSlidingView & TokenRefreshSlidingView
+	*** Sliding tokens என்ற JWT alternate system.
+	*** Difference: refresh token இல்லாமே, ஒரே sliding token rotate ஆகும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🎯 Summary (புரிய எளிதாக)
+
+--- Login → TokenObtainPairView
+--- username/password குடுத்து → access + refresh tokens கிடைக்கும்
+
+--- Refresh → TokenRefreshView
+--- refresh குடுத்து → புதிய access token கிடைக்கும்
+
+--- Verify → TokenVerifyView
+--- token validதானா expiredஆனா check பண்ணும்
+
+--- Logout → TokenBlacklistView
+--- refresh token-ஐ blacklist பண்ணும் (மீண்டும் use பண்ண முடியாது)
+
+--- Sliding system → TokenObtainSlidingView, TokenRefreshSlidingView
+--- one-token system (refresh இல்லாமல் rotate ஆகும்)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
