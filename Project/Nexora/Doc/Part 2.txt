@@ -95,4 +95,102 @@ Example:
 
 --- write_only → இது request-க்கு மட்டும், response-ல காட்டாதது.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔹 Summary
 
+--- viewsets → API views create/update/list/delete easy-ஆ manage பண்ண.
+--- permissions → யாருக்கு access control கொடுக்கணும்னு decide பண்ண.
+--- filters → API results-ஐ search, filter, sort பண்ண.
+
+😃 Simple-ஆ சொன்னா:
+
+--- viewsets = CRUD shortcut
+--- permissions = Access control
+--- filters = Search, filter, ordering
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔹 When to use what?
+
+1. Generic Views →
+
+--- Only சில operations மட்டும் வேண்டும்னா (உதா: list & retrieve மட்டும்).
+--- Code-ஐ அதிகம் control பண்ணணும்னா.
+
+2. ViewSets →
+
+--- Full CRUD (list, create, retrieve, update, delete) எல்லாம் வேண்டும்.
+--- URLs auto-generate ஆகணும்னா (router-ஐ use பண்ணலாம்).
+--- Rapid development (faster coding).
+
+✅ Simple Answer:
+
+--- Generic views → fine-grained control, few endpoints.
+--- ViewSets → shortcut, all CRUD bundled.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔹 Summary (Simple Tamil)
+
+1. Accounts app → generic views
+
+--- காரணம்: சில endpoints மட்டும் (register, login, profile).
+--- Full CRUD வேண்டியதில்லை.
+
+2. Products app → viewset
+
+--- காரணம்: Products, Categories, Brands எல்லாம் seller/admin manage பண்ணுறது.
+--- Full CRUD operations தேவை.
+--- அதனால ஒரே class-ல எல்லாம் bundle ஆகிற ViewSet use பண்ணுறோம்.
+
+✅ So logic:
+
+--- accounts → special actions, அதனால generic views.
+--- products → standard CRUD, அதனால viewset.
+
+✅ Shortcut நினைவில் வைங்க:
+
+--- “Few actions → Generic”
+--- “Full CRUD → ViewSet”
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+| Approach                      | Use Case                                   |
+| ----------------------------- | ------------------------------------------ |
+| **APIView**                   | Full custom logic, அதிக code, அதிக control |
+| **Function Based View (FBV)** | Small/simple APIs, prototype               |
+| **Generic Views**             | Common CRUD actions, fewer endpoints       |
+| **ViewSets**                  | Full CRUD, auto URLs, faster dev           |
+| **Mixins + GenericAPIView**   | Semi-custom reusable CRUD                  |
+
+✅ Final Tip:
+
+--- Small/simple API → FBV / APIView
+--- Specific action only → Generic View
+--- Full CRUD + auto routes → ViewSet
+--- Heavy customization → APIView
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+| Permission Class                       | Purpose                                            |
+| -------------------------------------- | -------------------------------------------------- |
+| `AllowAny`                             | யாரும் access பண்ணலாம்                             |
+| `IsAuthenticated`                      | Login ஆனவர்களுக்கே access                          |
+| `IsAdminUser`                          | Admin users மட்டும்                                |
+| `IsAuthenticatedOrReadOnly`            | Read → யாரும், Write → Login only                  |
+| `DjangoModelPermissions`               | Django model-level permissions                     |
+| `DjangoModelPermissionsOrAnonReadOnly` | Anonymous = Read only, Authenticated = model perms |
+| `DjangoObjectPermissions`              | Object-level access control                        |
+| **Custom Permission**                  | உங்க business logic base பண்ணி                     |
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+| Approach                              | Use Case                                                       |
+| ------------------------------------- | -------------------------------------------------------------- |
+| **DjangoFilterBackend**               | Structured field-based filtering (exact matches, ranges, etc.) |
+| **SearchFilter**                      | Text search across fields                                      |
+| **OrderingFilter**                    | Sorting (asc/desc)                                             |
+| **Custom FilterBackend**              | Business-rule-based filtering                                  |
+| **Manual Filtering (`get_queryset`)** | Full control, custom logic                                     |
+
+✅ அதாவது:
+
+--- Simple filters → DjangoFilterBackend
+--- Search → SearchFilter
+--- Sorting → OrderingFilter
+--- Complex business logic → Custom FilterBackend or override get_queryset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
