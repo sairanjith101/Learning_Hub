@@ -1,0 +1,98 @@
+category = CategorySerializer(read_only=True)
+brand = BrandSerializer(read_only=True)
+
+🔹 இதன் அர்த்தம்
+
+--- ProductSerializer-ல் category & brand fields-ஐ nested serializer ஆக use பண்ணுறோம்.
+--- read_only=True என்பதால் → client (POST/PUT) செய்யும்போது அதை அனுப்ப முடியாது.
+--- But response (GET) பண்ணும்போது → nested details-ஆ return ஆகும்.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔹 Why read_only=True?
+
+--- Client-ன் request-ல இப்படி full object அனுப்ப வேண்டிய அவசியம் இல்லாததால.
+--- அதற்கு பதிலாக simple-ஆ category_id, brand_id (PrimaryKeyRelatedField) அனுப்பினால் போதும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--- category / brand → read-only → read செய்ய உதவும்
+--- category_id / brand_id → write-only → create/update செய்ய உதவும்
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+✅ Simple line:
+PrimaryKeyRelatedField use பண்ணுறதால foreign key field-க்கு client request-ல id மட்டும் அனுப்ப முடியும், nested object full-ஆ அனுப்ப வேண்டிய அவசியமில்லை.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🟢 மற்ற ways (just info)
+
+--- PrimaryKeyRelatedField → id மட்டும்.
+--- SlugRelatedField → name மாதிரி unique field கொண்டு identify பண்ணலாம்.
+--- StringRelatedField → read-only; __str__() string மட்டும்.
+--- HyperlinkedRelatedField → category-க்கு URL மட்டும் காட்டும்.
+
+--- ஆனா practice-ல id (write) + nested (read) தான் easy & most used. ✅
+
+✅ Summary:
+
+--- Create/update easy → PrimaryKeyRelatedField.
+--- Human-readable → SlugRelatedField.
+--- Read-only text → StringRelatedField.
+--- RESTful URL style → HyperlinkedRelatedField.
+--- Detailed nested object → Nested Serializer.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🔹 source என்ன?
+
+--- Serializer-ல நாம் declare பண்ணும் field name sometimes model-ல இருக்கும் field name-க்கு match ஆகாது.
+--- அப்போ source use பண்ணி **“இந்த serializer field எதை model-ல link பண்ணணும்”**ன்னு சொல்லிக்கொடுப்போம்.
+
+🔹 Example (உங்க codeல)
+
+category_id = serializers.PrimaryKeyRelatedField(
+    queryset=Category.objects.all(),
+    source="category",   # Product model-ல actual field name
+    write_only=True
+)
+
+
+--- Serializer-ல field name → category_id
+--- Model-ல field name → category (ForeignKey)
+
+👉 அதனால source="category" use பண்ணி mapping செய்கிறோம்.
+👉 இதனால் request-ல category_id வந்தாலும், அது save ஆகும்போது Product.category-க்கு assign ஆகும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔹 Breakdown (step by step)
+
+1. category = CategorySerializer(read_only=True)
+
+--- Response-ல் client category details full-ஆ பார்க்க உதவும்.
+--- Create/update செய்ய client இதை அனுப்ப முடியாது (read_only).
+
+2. category_id = PrimaryKeyRelatedField(...)
+
+--- Request (create/update)-ல் client category id மட்டும் அனுப்ப முடியும்.
+Example:
+
+{ "category_id": 1 }
+
+3. source="category"
+
+--- Serializer-க்கு சொல்லுறது → "இந்த category_id value-ஐ எடுத்து, model-ல இருக்கும் category field-க்கு assign பண்ணு".
+--- (Model-ல் category என்பது ForeignKey field தான்.)
+
+4. write_only=True
+
+--- இந்த field request-ல மட்டும் வேலை செய்யும் (write).
+--- Response-ல திரும்பி காட்டாது (read முடியாது).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🔹 Final Understanding:
+
+--- View/Read → category, brand (nested serializer).
+
+--- Create/Update → category_id, brand_id (just ID மட்டும்).
+
+--- PrimaryKeyRelatedField → ForeignKey relation-க்கு id கொண்டு instance set பண்ண.
+
+--- source → அந்த id எந்த model field-க்கு save ஆகணும்னு mapping சொல்ல.
+
+--- write_only → இது request-க்கு மட்டும், response-ல காட்டாதது.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
