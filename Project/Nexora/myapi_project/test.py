@@ -1,24 +1,10 @@
-from rest_framework import serializers
-from .models import Category, Brand, Product
+from rest_framework.routers import DefaultRouter
+from .views import CategoryViewSet, BrandViewSet, ProductViewSet
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = '__all__'
+router = DefaultRouter()
 
-class BrandSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Brand
-        fields = '__all__'
+router.register('categories', CategoryViewSet, basename='categories')
+router.register('brand', BrandViewSet, basename='brand')
+router.register('product', ProductViewSet, basename='product')
 
-class ProductSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    brand = BrandSerializer(read_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), source="category", write_only=True)
-    brand_id = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(). source="brand", write_only=True)
-
-    class Meta:
-        model = Product
-        fields = ("id", "name", "description", "price", "stock", "category", "brand",
-                  "category_id", "brand_id", "seller", "created_at", "updated_at")
-        read_only_fields = ("id", "seller", "created_at", "updated_at")
+urlpatterns = router.urls
