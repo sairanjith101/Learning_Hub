@@ -55,29 +55,29 @@ class CartViewSet(viewsets.ViewSet):
 
 # Checkout API (cart/views.py add)
 
-# from orders.models import Order, OrderItem  # we’ll create in Part 4
+from orders.models import Order, OrderItem  # we’ll create in Part 4
 
-# class CheckoutViewSet(viewsets.ViewSet):
-#     permission_classes = [IsAuthenticated]
+class CheckoutViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
 
-#     def create(self, request):
-#         cart, _ = Cart.objects.get_or_create(user=request.user)
-#         if not cart.items.exists():
-#             return Response({"error": "Cart is empty"}, status=400)
+    def create(self, request):
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        if not cart.items.exists():
+            return Response({"error": "Cart is empty"}, status=400)
 
-#         # Create order
-#         order = Order.objects.create(user=request.user, total=cart.total_price)
+        # Create order
+        order = Order.objects.create(user=request.user, total=cart.total_price)
 
-#         for item in cart.items.all():
-#             OrderItem.objects.create(
-#                 order=order,
-#                 product=item.product,
-#                 quantity=item.quantity,
-#                 price=item.product.price
-#             )
-#             # reduce stock
-#             item.product.stock -= item.quantity
-#             item.product.save()
+        for item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+            # reduce stock
+            item.product.stock -= item.quantity
+            item.product.save()
 
-#         cart.items.all().delete()  # clear cart after checkout
-#         return Response({"message": "Order placed successfully", "order_id": order.id}, status=201)
+        cart.items.all().delete()  # clear cart after checkout
+        return Response({"message": "Order placed successfully", "order_id": order.id}, status=201)
