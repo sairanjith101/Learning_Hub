@@ -1,26 +1,46 @@
-from rest_framework import serializers
-from orders.models import Order, OrderItem, Payment
-from products.serializers import ProductSerializer
+import uuid
+from rest_framework import viewsets,permissions, status
+from rest_framework.response import Response
+from orders.models import Order, Payment
+from orders.serializers import OrderSerializer, PaymentSerializer
 
-class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    class Meta:
-        model = OrderItem
-        fields = ('id', 'product', 'price')
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'ADMIN':
+            return Order.objects.all().order_by('-created_at')
+        return Order.objects.filter(user=user).order_by('-created_at')
 
-class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
+class PaymentViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
 
-    class Meta:
-        model = Order
-        fields = ('id', 'user', 'total', 'status', 'created_at', 'items')
-        read_only_fields = ('id', 'user', 'total', 'created_at', 'items')
+    def create(self, request):
+        order_id = request.data.get("order_id")
+        method = request.data.get("method", "Razorpay")
+        amount = request.data.get("amount")
 
-class PaymentSerializer(serializers.ModelSerializer):
-    order = serializers.PrimaryKeyRelatedField(queryset=Order.Objects.all())
+        try:
+            order = Order.objects.get(id=order_id, user=request.user)
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=404)
+        
+        if order.status != Order.Status.PENDING:
+            return Response({"error": "Order already paid or processed"}, status=400)
+        
+        txn_id = str(uuid.uuid4())
 
-    class Meta:
-        model = Payment
-        fields = ('id', 'order', 'amount', 'method', 'transaction_id', 'success', 'created_at')
-        read_only_fields = ('id', 'created_at')
+        payment = Payment.objects.create(
+            order=order,
+            amount = amount,
+            method=method,
+            transaction_id = txn_id,
+            success = True
+        )
+
+        order.status = Order.Status.PAID
+        order.save()
+
+        return Response(PaymentSerializer(payment).data, status=201)
