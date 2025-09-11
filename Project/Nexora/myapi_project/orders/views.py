@@ -11,9 +11,18 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+
         if user.role == "ADMIN":
+            # Admin - all orders
             return Order.objects.all().order_by('-created_at')
-        return Order.objects.filter(user=user).order_by('-created_at')
+
+        elif user.role == "SELLER":
+            # Seller - orders that contain their products
+            return Order.objects.filter(items__product__seller=user).distinct()
+
+        else:
+            # Customer - only their own orders
+            return Order.objects.filter(user=user).order_by('-created_at')
 
 
 class PaymentViewSet(viewsets.ViewSet):

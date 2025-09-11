@@ -56,11 +56,17 @@ class CartViewSet(viewsets.ViewSet):
 # Checkout API (cart/views.py add)
 
 from orders.models import Order, OrderItem  # we’ll create in Part 4
+from rest_framework.exceptions import PermissionDenied
+from rest_framework import permissions
 
 class CheckoutViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request):
+        # Restrict checkout → Customers only
+        if request.user.role != "CUSTOMER":
+            raise PermissionDenied("Only customers can checkout")
+
         cart, _ = Cart.objects.get_or_create(user=request.user)
         if not cart.items.exists():
             return Response({"error": "Cart is empty"}, status=400)
@@ -75,9 +81,9 @@ class CheckoutViewSet(viewsets.ViewSet):
                 quantity=item.quantity,
                 price=item.product.price
             )
-            # reduce stock
+            # Reduce stock
             item.product.stock -= item.quantity
             item.product.save()
 
-        cart.items.all().delete()  # clear cart after checkout
+        cart.items.all().delete()
         return Response({"message": "Order placed successfully", "order_id": order.id}, status=201)
