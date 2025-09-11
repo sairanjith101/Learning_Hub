@@ -47,3 +47,14 @@ class PaymentViewSet(viewsets.ViewSet):
         order.save()
 
         return Response(PaymentSerializer(payment).data, status=201)
+
+# 2) Coupons / Discounts
+
+from .models import Coupon
+from .serializers import CouponSerializer
+from rest_framework import viewsets
+
+class CouponViewSet(viewsets.ModelViewSet):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = [permissions.IsAdminUser]

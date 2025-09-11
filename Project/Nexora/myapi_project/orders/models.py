@@ -41,3 +41,15 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.transaction_id} for Order {self.order.id}"
+
+# 2) Coupons / Discounts
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    discount_percent = models.PositiveIntegerField()  # e.g., 10 for 10%
+    active = models.BooleanField(default=True)
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+
+    def __str__(self):
+        return f"{self.code} - {self.discount_percent}%"

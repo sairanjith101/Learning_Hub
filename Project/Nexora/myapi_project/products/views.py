@@ -36,3 +36,20 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
+
+# 1) Wishlist API
+
+from .models import Wishlist
+from .serializers import WishlistSerializer
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+class WishlistViewSet(viewsets.ModelViewSet):
+    serializer_class = WishlistSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Wishlist.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

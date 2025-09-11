@@ -25,3 +25,17 @@ class ProductSerializer(serializers.ModelSerializer):
                   'category', 'brand', 'category_id', 'brand_id',
                   'seller', 'created_at', 'updated_at')
         read_only_fields = ('id', 'seller', 'created_at', 'updated_at')
+
+
+# 1) Wishlist API
+from .models import Wishlist
+
+class WishlistSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source="product", write_only=True)
+
+    class Meta:
+        model = Wishlist
+        fields = ('id', 'product', 'product_id', 'added_at')
+        read_only_fields = ('id', 'added_at')
+

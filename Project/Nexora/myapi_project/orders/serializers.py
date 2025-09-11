@@ -26,3 +26,12 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ('id', 'order', 'amount', 'method', 'transaction_id', 'success', 'created_at')
         read_only_fields = ('id', 'created_at')
+
+# 2) Coupons / Discounts
+
+from .models import Coupon
+
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = '__all__'
