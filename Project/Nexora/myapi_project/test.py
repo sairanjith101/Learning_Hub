@@ -1,46 +1,19 @@
-import uuid
-from rest_framework import viewsets,permissions, status
-from rest_framework.response import Response
-from orders.models import Order, Payment
-from orders.serializers import OrderSerializer, PaymentSerializer
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from django.urls import path
 
-class OrderViewSet(viewsets.ModelViewSet):
-    serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated]
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Nexora API",
+        default_version="v1",
+        description="Backends APIs for Nexora E-Com",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == 'ADMIN':
-            return Order.objects.all().order_by('-created_at')
-        return Order.objects.filter(user=user).order_by('-created_at')
-
-class PaymentViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def create(self, request):
-        order_id = request.data.get("order_id")
-        method = request.data.get("method", "Razorpay")
-        amount = request.data.get("amount")
-
-        try:
-            order = Order.objects.get(id=order_id, user=request.user)
-        except Order.DoesNotExist:
-            return Response({"error": "Order not found"}, status=404)
-        
-        if order.status != Order.Status.PENDING:
-            return Response({"error": "Order already paid or processed"}, status=400)
-        
-        txn_id = str(uuid.uuid4())
-
-        payment = Payment.objects.create(
-            order=order,
-            amount = amount,
-            method=method,
-            transaction_id = txn_id,
-            success = True
-        )
-
-        order.status = Order.Status.PAID
-        order.save()
-
-        return Response(PaymentSerializer(payment).data, status=201)
+urlpatterns = [
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc')
+]

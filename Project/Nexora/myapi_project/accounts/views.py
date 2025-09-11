@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .serializers import RegisterSerializer, ProfileSerializer
 
-from ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 
 User = get_user_model()
