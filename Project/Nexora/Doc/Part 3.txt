@@ -1,0 +1,169 @@
+
+related_name என்பதுதான் reverse accessor name.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+related_name இல்லாமல் இருந்தால்?
+
+--- Django default name கொடுக்கும்:
+--- ForeignKeyக்கு → <modelname>_set (எ.கா. cartitem_set)
+--- OneToOneFieldக்கு → default model name (clash இருந்தா error வரும்)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+சுருக்கமாக:
+
+--- Forward access = foreign key field name-ஐ பயன்படுத்துவோம் (item.cart).
+--- Reverse access = related_name-ஐ பயன்படுத்துவோம் (cart.items).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+சுருக்கமாக:
+
+--- @property use பண்ணினால் → parantheses ( ) போடாமலே access செய்யலாம்.
+--- இல்லேன்னா → method போல ( ) போட்டு call செய்யணும்.
+
+@property ஏன் useful?
+
+--- Readability → ஒரு cart-க்கு total price “ஒரு value” மாதிரி தான் இருக்கும்; function போல இல்லாம attribute மாதிரி access பண்ணினா natural-ஆ இருக்கும் (cart.total_price).
+--- Django Templates → Django templates-ல் methods-ஐ call செய்ய முடியாது ({{ cart.total_price() }} வேலை செய்யாது). ஆனால் property-ஆ இருந்தா easy-ஆ {{ cart.total_price }} என்று பயன்படுத்தலாம்.
+--- Encapsulation → உங்களுக்கு later calculation logic change பண்ணணும் என்றாலும் outside code எல்லாம் cart.total_price என்றே இருக்கும், safe-ஆ இருக்கிறது.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class Meta: unique_together = ("cart", "product")
+
+--- ஒரே cart-ல் ஒரே product இரண்டு முறை repeat ஆகாமல் prevent பண்ணும்.
+--- அதாவது ஒரே user ஒரே product-ஐ ஒரே cart-ல இரண்டு records-ஆ வைத்துக்க முடியாது. Instead, quantity increment ஆகணும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+product = ProductSerializer(read_only=True)
+
+--- ஒரு item-க்கு சேர்ந்த product முழு details (name, price, etc.) nested serializer மூலம் காட்டப்படும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🎯 சுருக்கம்
+
+--- PrimaryKeyRelatedField → related object-ஐ அதன் id மூலம் handle பண்ணும் field.
+--- queryset=Product.objects.all() → valid objects எவை என்று specify பண்ணுறது (validationக்காக).
+--- source="product" → இந்த serializer field CartItem.product-க்கு map ஆகணும்.
+--- write_only=True → request-ல மட்டும் use ஆகும், response-ல வராது.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+subtotal = serializers.SerializerMethodField()
+
+👉 “subtotal details-ஐ database-ல column-ஆ save பண்ணாம, runtime-ல் (dynamic-ஆ) calculate பண்ணி, API response-க்கு மட்டும் சேர்க்குறோம்.”
+
+🎯 சுருக்கம்:
+
+--- DB-ல் இல்லை
+--- Serializer response-ல மட்டும் வரும்
+--- Dynamic calculation (எப்போ request பண்ணுறோமோ அப்போ calculate பண்ணும்)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. Meta.fields என்ன செய்கிறது?
+
+--- Serializer-க்கு என்ன fields API response/request-ல் வரணும் என்பதை control பண்ணுது.
+--- இது model-ல் உள்ள fields மட்டும் அல்ல, serializer-ல் நம்ம define பண்ணிய extra fields-யும் சேர்க்க முடியும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🎯 சுருக்கம்:
+
+--- obj = serializer process பண்ணுற current CartItem row.
+--- Loop-ல பல items இருந்தா, ஒவ்வொரு item-க்கும் அந்த row தான் obj ஆக வரும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- SerializerMethodField use பண்ணுவோம் → calculated / custom fields response-ல காட்ட.
+--- obj use பண்ணுவோம் → current serialize ஆகும் object-க்கு value compute பண்ண
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cart, _ = Cart.objects.get_or_create(user=request.user)
+--- என்றது "இந்த user-க்கு cart இருந்தா எடுத்துக்கொள், இல்லனா புதியது create பண்ணு" என்று அர்த்தம்.
+
+அதாவது:
+
+--- உங்க code-க்கு cart மட்டும் தேவை.
+--- created எதுவும் use பண்ணவே வேண்டாம்னு முடிவு பண்ணிருப்பாங்க.
+--- அதனால second return value-க்கு _ assign பண்ணிட்டாங்க.
+
+👉 Simple-ஆ சொன்னா:
+
+--- created value use பண்ணணும் என்றால் அதை பெயர் வைத்துக் கொள்ளலாம்.
+--- Use பண்ணவேண்டாம்னா _ வைச்சிடலாம்.
+
+--- “இந்த user-க்கு ஒரு Cart இருந்தா எடுத்துக்கோ, இல்லனா database-ல புதிய Cart create பண்ணு”
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+✅ Final Answer:
+user=request.user use பண்ணுறது காரணம் → ஒவ்வொரு user-க்கும் அவர்களுடைய தனிப்பட்ட cart DB-ல maintain பண்ணணும்.
+இல்லேன்னா எல்லா users-ம் ஒரே cart-ஐ share பண்ணிடுவாங்க.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 Simple Story Form:
+
+--- User ஒரு product add பண்ணுறான்.
+--- அந்த user-க்கு cart இருக்கிறதா check பண்ணுறோம் → இல்லேன்னா புதியது create பண்ணுறோம்.
+--- Request data (product_id, quantity) validate பண்ணுறோம்.
+--- அந்த product ஏற்கனவே cart-ல இருக்கா check பண்ணுறோம்.
+--- இருந்தா → quantity update பண்ணுறோம்.
+--- இல்லேன்னா → புதிய cart item create பண்ணுறோம்.
+--- Updated cart முழுமையா return பண்ணுறோம்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+✅ Summary
+
+--- list → cart view பண்ணும்போது cart இல்லேன்னா create பண்ணுது.
+--- create → product add பண்ணும்போது cart இல்லேன்னா create பண்ணுது.
+--- இரண்டு இடத்திலும் redundancy போல தோணும், ஆனா அது safety measure — user எந்த API-யும் முதல்ல call பண்ணினாலும் cart உறுதி.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+4. Real-world analogy 🛒
+
+--- request.data = customer கொடுத்த note (“iPhone 3 pieces வாங்கணும்”).
+--- CartItemSerializer(data=request.data) = அந்த note-ஐப் பார்த்து:
+--- spelling சரியா இருக்கு?
+--- அந்த product shop-ல இருக்கா?
+--- quantity valid-ஆ இருக்கு?
+--- Validation pass ஆகினால் தான் shopkeeper actual cart-க்கு item சேர்ப்பார்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+✅ Summary:
+
+--- list → “Cart show பண்ணு” (GET).
+--- create → “Item add பண்ணி updated cart return பண்ணு” (POST).
+--- அதனாலே இரண்டிலும் CartSerializer(cart) use பண்ணுறோம்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Flow:
+
+--- Cart create பண்ணல்
+--- cart, _ = Cart.objects.get_or_create(user=request.user)
+--- User-க்கு cart exist பண்ணணும், இல்லனா create பண்ணுறோம்.
+--- இதுல item-ஐ save செய்யாமே, cart row மட்டும் DB-ல இருக்கும்.
+--- User request அனுப்புறார்
+
+Example request:
+
+{
+  "product_id": 5,
+  "quantity": 2
+}
+
+
+--- இது serializer-க்கு data=request.data அனுப்புறோம்.
+--- Serializer validate பண்ணும்
+--- serializer.is_valid()
+--- Product & quantity valid-ஆ இருக்கிறதா என்று check பண்ணும்.
+--- இதுவே save செய்யாது, just clean validated data மட்டும் return பண்ணும்.
+--- Item create பண்ணும்
+--- item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+--- First-time: create பண்ணும்
+--- Already exists: quantity update பண்ணும்
+--- பிறகு DB-ல் save பண்ணும்
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✅ Summary for:
+
+def update(self, request, pk=None):
+
+--- User-க்கு cart create or fetch பண்ணும்.
+--- Cart-ல specific item fetch பண்ணும்.
+--- Request data validate பண்ணி, update பண்ணும்.
+--- Update success → updated cart return, fail → error return.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1️⃣ CartItemSerializer vs CartSerializer
+
+CartItemSerializer
+
+--- Single cart item-ஐ represent pannum (like quantity, product).
+--- Example: { "id": 1, "product": "Apple", "quantity": 3 }
+
+CartSerializer
+
+--- Whole cart-ஐ represent pannum, including all items inside it.
+
+✅ Summary
+
+--- CartItemSerializer → update pannum, validate pannum.
+--- CartSerializer → response la whole cart data send pannum, so frontend-ku easy.

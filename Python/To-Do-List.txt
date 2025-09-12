@@ -1,0 +1,26 @@
+Coding Qustions:
+1. Reverse String
+2. Palindrome
+3. largest/smallest
+4. remove duplicates
+5. frequency of each character
+6. check if a number is prime
+7. Fibonacci numbers
+8.without using a temporary variable
+9. Merge two dictionaries
+10. intersection and union 
+11. second largest number
+12. vowels in a string.
+13. duplicates
+14. anagrams
+15.first non-repeating character
+16. capitalize the first letter of each word 
+17. Reverse words in a sentence.
+18. Write
+19.Read
+20. copy contents from one file to another
+21. Create a file and write multiple lines of text to it.
+22. check if a file exists
+23. read a file line by line and print each line
+24. appends text to an existing file.
+25. count the number of lines in a file
