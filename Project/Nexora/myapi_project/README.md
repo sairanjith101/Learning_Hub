@@ -1,175 +1,131 @@
 # 🛒 Nexora – Multi-Vendor E-Commerce Backend (Django + DRF)
 
-## 📌 Project Overview
-
-**Nexora** is a **multi-vendor e-commerce backend** built with **Django** and **Django REST Framework (DRF)**.
-It supports multiple user roles (**Admin, Seller, Customer**) and provides APIs for:
-
-* User & vendor management
-* Product handling (by sellers)
-* Cart management (by customers)
-* Order placement (checkout flow ready for extension)
-
-The backend is API-first, making it easy to integrate with frontend apps (React, Angular, Next.js) or mobile apps (Flutter, React Native).
+## 📌 Overview
+**Nexora** is a **multi-vendor e-commerce backend** built with **Django** and **Django REST Framework (DRF)**.  
+It provides role-based APIs for **Admins, Sellers, and Customers**, making it suitable for e-commerce apps (React, Next.js, Flutter, etc.).
 
 ---
 
 ## 🚀 Features
+- **User & Vendor Accounts**
+  - Admin → manage users/vendors  
+  - Seller → add/manage products  
+  - Customer → browse & purchase  
+- **Cart Management** → add, update, remove items  
+- **Orders** → checkout flow (extensible)  
+- **Authentication** → JWT-based login & register  
+- **Error Logging** → centralized log file (`errors.log`)  
 
-* **User & Vendor Accounts**
+---
 
-  * Admin can create/manage users
-  * Sellers can register and add products
-  * Customers can browse and purchase products
-* **Cart Management**
-
-  * Add/update/remove products in cart
-  * Cart linked to user session
-* **Authentication**
-
-  * Login & registration APIs
-  * Role-based access (Admin, Seller, Customer)
-* **API-First**
-
-  * Built with DRF for clean and structured REST APIs
-* **Error Logging**
-
-  * Centralized logging with `errors.log`
+## 🧑‍🤝‍🧑 Roles
+- **Admin** → Manage all users and vendors  
+- **Seller** → Create and manage own products  
+- **Customer** → Browse products, manage cart, place orders  
 
 ---
 
 ## 📂 Project Structure
-
 ```
 nexora_project/
 │── manage.py
 │── requirements.txt
 │── errors.log
 │
-│── nexora/                # Main project configuration
-│   ├── settings.py
-│   ├── urls.py
-│
-│── accounts/              # User & Vendor management
-│   ├── models.py
-│   ├── serializers.py
-│   ├── views.py
-│   ├── urls.py
-│
-│── cart/                  # Cart management
-│   ├── models.py
-│   ├── serializers.py
-│   ├── views.py
-│   ├── urls.py
+│── nexora/        # Project settings & URLs
+│── accounts/      # User & role management
+│── cart/          # Cart & order logic
 ```
 
 ---
 
-## ⚙️ Installation & Setup
-
-### 1️⃣ Clone the repository
-
+## ⚙️ Setup Instructions
+### 1️⃣ Clone repo
 ```bash
-git clone <your-nexora-repo-url>
+git clone <your-repo-url>
 cd nexora_project
 ```
 
-### 2️⃣ Create & activate virtual environment
-
+### 2️⃣ Create virtual environment
 ```bash
 python -m venv venv
-source venv/bin/activate   # For Linux/Mac
-venv\Scripts\activate      # For Windows
+source venv/bin/activate   # Mac/Linux
+venv\Scripts\activate      # Windows
 ```
 
 ### 3️⃣ Install dependencies
-
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 4️⃣ Apply migrations
-
 ```bash
 python manage.py migrate
 ```
 
 ### 5️⃣ Create superuser (Admin)
-
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6️⃣ Run the server
-
+### 6️⃣ Run server
 ```bash
 python manage.py runserver
 ```
-
-Server will be running at: **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**
+Server → [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ---
 
 ## 🔑 API Endpoints
+### Authentication
+- `POST /accounts/register/` → Register user  
+- `POST /accounts/login/` → Login (returns JWT)  
+- `GET /accounts/users/` → List users (Admin only)  
 
-### Authentication (Accounts App)
-
-* `POST /accounts/register/` → Register (Admin/Seller/Customer)
-* `POST /accounts/login/` → Login (returns token/session)
-* `GET /accounts/users/` → View all users (Admin only)
-
-### Seller (Vendor)
-
-* `POST /products/` → Add new product
-* `PUT /products/{id}/` → Update product
-* `GET /products/my/` → View own products
+### Seller
+- `POST /products/` → Add product  
+- `PUT /products/{id}/` → Update product  
+- `GET /products/my/` → List own products  
 
 ### Customer
-
-* `GET /products/` → Browse products
-* `POST /cart/` → Add item to cart
-* `PUT /cart/{id}/` → Update quantity
-* `GET /cart/` → View cart
-* `POST /orders/` → Checkout
+- `GET /products/` → Browse all products  
+- `POST /cart/` → Add item to cart  
+- `PUT /cart/{id}/` → Update quantity  
+- `GET /cart/` → View cart  
+- `POST /orders/` → Checkout  
 
 ---
 
-## 🧑‍💻 Postman Testing (Role-Based)
+## 📌 Minimal Example (cURL)
+```bash
+# Register
+curl -X POST http://127.0.0.1:8000/accounts/register/   -H "Content-Type: application/json"   -d '{"email":"user@example.com","password":"mypassword"}'
 
-* **Admin**
+# Login
+curl -X POST http://127.0.0.1:8000/accounts/login/   -H "Content-Type: application/json"   -d '{"email":"user@example.com","password":"mypassword"}'
+```
 
-  * Create Seller & Customer accounts
-* **Seller**
-
-  * Login → Add products → Manage stock
-* **Customer**
-
-  * Login → Browse products → Add to cart → Checkout
-
-👉 Use **Authorization: Bearer <token>** in headers for protected routes.
+Use returned token:
+```
+Authorization: Bearer <your_token>
+```
 
 ---
 
 ## 🛠️ Tech Stack
-
-* **Backend:** Python, Django, Django REST Framework
-* **Database:** SQLite (can be switched to MySQL/PostgreSQL)
-* **API Testing:** Postman
-* **Authentication:** Django Auth (JWT ready)
+- **Backend:** Python, Django, DRF  
+- **Database:** SQLite (switchable to MySQL/PostgreSQL)  
+- **Auth:** JWT Authentication  
+- **API Testing:** Postman  
 
 ---
 
 ## 📌 Future Enhancements
-
-* Product Reviews & Ratings
-* Payment Gateway Integration (Stripe/Razorpay)
-* Celery for background tasks (order emails, notifications)
-* Redis caching for scalability
+- Product reviews & ratings  
+- Payment gateway integration  
+- Background jobs (emails, notifications)  
 
 ---
 
 ## 📜 License
-
-This project is for **educational/demo purposes**.
-
----
+This project is for **educational/demo purposes** (MIT License recommended).  
