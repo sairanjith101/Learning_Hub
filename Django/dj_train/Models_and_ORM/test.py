@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import pathgit 
 from . import views
 
 urspattern = [

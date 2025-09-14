@@ -27,21 +27,14 @@ It provides role-based APIs for **Admins, Sellers, and Customers**, making it su
 
 ## 📂 Project Structure
 ```
-myapi_project/
-├─ manage.py
-├─ requirements.txt
-├─ README.md
-├─ LICENSE                 
-├─ .gitignore
-├─ nexora/                 # Django project package (settings, urls)
-├─ accounts/               # user registration, login, profile
-├─ products/               # products, categories, brands, wishlist
-├─ cart/                   # cart, checkout
-├─ orders/                 # orders, payments, coupons
-├─ static/                 # (optional) static files
-├─ media/                  # (optional) user uploads
-└─ errors.log              # ⚠️ dev log (ignore in production)
-
+nexora_project/
+│── manage.py
+│── requirements.txt
+│── errors.log
+│
+│── nexora/        # Project settings & URLs
+│── accounts/      # User & role management
+│── cart/          # Cart & order logic
 ```
 
 ---
@@ -121,7 +114,7 @@ Authorization: Bearer <your_token>
 
 ## 🛠️ Tech Stack
 - **Backend:** Python, Django, DRF  
-- **Database:** MySQL (via PyMySQL, can also switch to SQLite/PostgreSQL)  
+- **Database:** SQLite (switchable to MySQL/PostgreSQL)  
 - **Auth:** JWT Authentication  
 - **API Testing:** Postman  
 
