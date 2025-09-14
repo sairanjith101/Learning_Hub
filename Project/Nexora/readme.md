@@ -33,11 +33,11 @@ This README contains setup, usage, API reference, environment variables, deploym
 10. [Development notes](#development-notes)
 11. [Troubleshooting](#troubleshooting)
 12. [Security checklist](#security-checklist)
-13. [License](#license)
+13. [License](#license-)
 
 ---
 
-## 🚀 Quick Summary & Features
+## Quick Summary & Features
 
 * Django 5.2 project (`nexora`)
 * Role-based APIs:
