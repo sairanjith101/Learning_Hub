@@ -278,3 +278,48 @@ Traceback (most recent call last):
     raise errorclass(errno, errval)
 django.db.utils.ProgrammingError: (1146, "Table 'nexora.products_wishlist' doesn't exist")
 "GET /admin/accounts/user/2/delete/ HTTP/1.1" 500 271850
+Internal Server Error: /api/auth/me
+Traceback (most recent call last):
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\utils\deprecation.py", line 122, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\middleware\common.py", line 108, in process_response
+    return self.response_redirect_class(self.get_full_path_with_slash(request))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\middleware\common.py", line 87, in get_full_path_with_slash
+    raise RuntimeError(
+RuntimeError: You called this URL via PATCH, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining PATCH data. Change your form to point to 127.0.0.1:8000/api/auth/me/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+"PATCH /api/auth/me HTTP/1.1" 500 71162
+Internal Server Error: /api/auth/me
+Traceback (most recent call last):
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\utils\deprecation.py", line 122, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\middleware\common.py", line 108, in process_response
+    return self.response_redirect_class(self.get_full_path_with_slash(request))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\middleware\common.py", line 87, in get_full_path_with_slash
+    raise RuntimeError(
+RuntimeError: You called this URL via PATCH, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining PATCH data. Change your form to point to 127.0.0.1:8000/api/auth/me/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+"PATCH /api/auth/me HTTP/1.1" 500 71162
+Internal Server Error: /api/auth/me
+Traceback (most recent call last):
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\utils\deprecation.py", line 122, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\middleware\common.py", line 108, in process_response
+    return self.response_redirect_class(self.get_full_path_with_slash(request))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Learning_Hub\Project\Nexora\myapi_project\venv\Lib\site-packages\django\middleware\common.py", line 87, in get_full_path_with_slash
+    raise RuntimeError(
+RuntimeError: You called this URL via PUT, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining PUT data. Change your form to point to 127.0.0.1:8000/api/auth/me/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+"PUT /api/auth/me HTTP/1.1" 500 71132
