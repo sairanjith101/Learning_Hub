@@ -114,7 +114,7 @@ Authorization: Bearer <your_token>
 
 ## 🛠️ Tech Stack
 - **Backend:** Python, Django, DRF  
-- **Database:** SQLite (switchable to MySQL/PostgreSQL)  
+- **Database:** MySQL (via PyMySQL, can also switch to SQLite/PostgreSQL)  
 - **Auth:** JWT Authentication  
 - **API Testing:** Postman  
 
