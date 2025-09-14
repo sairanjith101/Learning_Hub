@@ -1,7 +1,7 @@
 
 # Nexora
 
-**Nexora** is a Django + Django REST Framework based e‑commerce backend (minimal, production-ready patterns) that provides user authentication (JWT), product/catalog management, wishlist, cart & checkout, orders, payments and coupon management. This README covers end-to-end setup, usage, API reference, environment variables, deployment notes, and development tips so nothing is missed.
+**Nexora** is a Django + Django REST Framework based e‑commerce backend (minimal, production-ready patterns) that provides user authentication (JWT), product/catalog management, wishlist, cart & checkout, orders, payments and coupon management. This README contains setup, usage, API reference, environment variables, deployment notes, and development tips.
 
 > Project location in this archive: `myapi_project/` — project package `nexora/`.  
 > **Important:** the repository in the zip includes a `venv/` folder and other environment artefacts. Remove `venv/` before pushing to remote.
@@ -330,8 +330,7 @@ python manage.py test
 
 ## License
 
-Add your preferred license (MIT, Apache-2.0, etc.) in `LICENSE` file.
+This project is licensed under the MIT License. See the LICENSE file for details.
 
 ---
 
-*README generated from scanning the project files included in the uploaded archive.*  
