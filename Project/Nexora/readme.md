@@ -21,12 +21,12 @@ This README contains setup, usage, API reference, environment variables, deploym
 
 ## Table of Contents
 
-1. [Quick summary & features](#quick-summary-features)
+1. [Quick summary & features](#quick-summary--features)
 2. [Tech stack](#tech-stack)
 3. [Project structure](#project-structure)
 4. [Initial setup](#initial-setup)
 5. [Environment variables](#environment-variables)
-6. [Database setup & migrations](#database-setup-migrations)
+6. [Database setup & migrations](#database-setup--migrations)
 7. [Run server](#run-server)
 8. [API documentation](#api-documentation)
 9. [Authentication examples](#authentication-examples)
