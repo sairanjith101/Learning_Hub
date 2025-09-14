@@ -19,25 +19,25 @@ This README contains setup, usage, API reference, environment variables, deploym
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-1. [✨ Quick summary & features](#quick-summary-features)
-2. [🛠 Tech stack](#tech-stack)
-3. [🗂 Project structure](#project-structure)
-4. [⚙️ Initial setup](#initial-setup)
-5. [🔑 Environment variables](#environment-variables)
-6. [🗄 Database setup & migrations](#database-setup-migrations)
-7. [▶️ Run server](#run-server)
-8. [📄 API documentation](#api-documentation)
-9. [🔐 Authentication examples](#authentication-examples)
-10. [💡 Development notes](#development-notes)
-11. [🚑 Troubleshooting](#troubleshooting)
-12. [🔒 Security checklist](#security-checklist)
-13. [📜 License](#license)
+1. [Quick summary & features](#quick-summary-features)
+2. [Tech stack](#tech-stack)
+3. [Project structure](#project-structure)
+4. [Initial setup](#initial-setup)
+5. [Environment variables](#environment-variables)
+6. [Database setup & migrations](#database-setup-migrations)
+7. [Run server](#run-server)
+8. [API documentation](#api-documentation)
+9. [Authentication examples](#authentication-examples)
+10. [Development notes](#development-notes)
+11. [Troubleshooting](#troubleshooting)
+12. [Security checklist](#security-checklist)
+13. [License](#license)
 
 ---
 
-## ✨ Quick summary & features
+## Quick summary & features
 
 * Django 5.2 project (`nexora`)
 * Role-based APIs:
@@ -53,7 +53,7 @@ This README contains setup, usage, API reference, environment variables, deploym
 
 ---
 
-## 🛠 Tech stack
+## Tech stack
 
 * **Backend:** Python 3.11, Django 5.2, Django REST Framework
 * **Auth:** JWT (SimpleJWT)
@@ -63,7 +63,7 @@ This README contains setup, usage, API reference, environment variables, deploym
 
 ---
 
-## 🗂 Project structure
+## Project structure
 
 ```
 myapi_project/
@@ -87,7 +87,7 @@ Key files:
 
 ---
 
-## ⚙️ Initial setup
+## Initial setup
 
 ```bash
 cd myapi_project
@@ -100,7 +100,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🔑 Environment variables
+## Environment variables
 
 `.env` sample:
 
@@ -118,7 +118,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 
 ---
 
-## 🗄 Database setup & migrations
+## Database setup & migrations
 
 ```sql
 CREATE DATABASE nexora CHARACTER SET utf8mb4;
@@ -135,7 +135,7 @@ python manage.py createsuperuser
 
 ---
 
-## ▶️ Run server
+## Run server
 
 ```bash
 python manage.py runserver
@@ -146,7 +146,7 @@ python manage.py runserver
 
 ---
 
-## 📄 API documentation
+## API documentation
 
 Full API details, serializers, and query params are visible in Swagger & ReDoc.
 
@@ -181,7 +181,7 @@ Base: `/api/`
 
 ---
 
-## 🔐 Authentication examples
+## Authentication examples
 
 ```bash
 # Register
@@ -197,7 +197,7 @@ curl -X POST http://127.0.0.1:8000/api/auth/login/ \
 
 ---
 
-## 💡 Development notes
+## Development notes
 
 * Add `.gitignore` (exclude `venv/`, `.env`, `__pycache__/`, `*.pyc`, logs).
 * `errors.log` is for local debugging.
@@ -206,7 +206,7 @@ curl -X POST http://127.0.0.1:8000/api/auth/login/ \
 
 ---
 
-## 🚑 Troubleshooting
+## Troubleshooting
 
 * Reinstall dependencies: `pip install -r requirements.txt`
 * Ensure DB is running & credentials are correct
@@ -214,7 +214,7 @@ curl -X POST http://127.0.0.1:8000/api/auth/login/ \
 
 ---
 
-## 🔒 Security checklist
+## Security checklist
 
 * Use a strong `DJANGO_SECRET_KEY`
 * Enable HTTPS (`SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`)
@@ -222,7 +222,7 @@ curl -X POST http://127.0.0.1:8000/api/auth/login/ \
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License**. See [LICENSE](./LICENSE) for full details.
 
