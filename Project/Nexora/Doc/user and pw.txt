@@ -50,3 +50,16 @@ Seller → Own products CRUD + see orders for their products only.
 Customer → Shopping flow (browse, cart, wishlist, checkout, payment, view own orders).
 
 👉 So yes — indha fixes apply panna, unga project multi-vendor logic break aagala. All the issues you listed get solved.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Project: Nexora – Multi-Vendor E-Commerce Backend
+
+Built a role-based e-commerce backend using Django & Django REST Framework (DRF) with support for Admins, Sellers, and Customers.
+
+Implemented JWT authentication, cart & order system, and centralized error logging.
+
+Integrated with MySQL (via PyMySQL), designed to be flexible with SQLite/PostgreSQL.
+
+Developed RESTful APIs consumable by web (React/Next.js) and mobile apps (Flutter).
+
+Tools: Python, Django, DRF, MySQL, Postman.
