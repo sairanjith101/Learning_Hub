@@ -10,6 +10,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from storage import models
+from django.db.models import Sum
+
 
 
 
@@ -23,7 +25,7 @@ class FileViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         uploaded_file = self.request.FILES["file"]
         user = self.request.user
-        used_space = File.objects.filter(owner=user).aggregate(total=models.Sum("size"))["total"] or 0
+        used_space = File.objects.filter(owner=user).aggregate(total=Sum("size"))["total"] or 0
 
         if used_space + uploaded_file.size > user.storage_quota:
             from rest_framework.exceptions import ValidationError
@@ -34,6 +36,18 @@ class FileViewSet(viewsets.ModelViewSet):
             filename=uploaded_file.name,
             size=uploaded_file.size,
         )
+
+    # New action for quota usage [ GET http://127.0.0.1:8000/api/files/usage/ ]
+    @action(detail=False, methods=["get"])
+    def usage(self, request):
+        user = request.user
+        used_space = File.objects.filter(owner=user).aggregate(total=Sum("size"))["total"] or 0
+        remaining_space = user.storage_quota - used_space
+        return Response({
+            "used_space": used_space,
+            "remaining_space": max(remaining_space, 0),
+            "storage_quota": user.storage_quota,
+        })
 
     # Generate temporary share link
     @action(detail=True, methods=["get"])
