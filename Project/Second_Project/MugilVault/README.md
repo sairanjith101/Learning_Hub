@@ -154,7 +154,7 @@ Base: `/api/files/`
 curl -X POST http://127.0.0.1:8000/api/auth/register/   -H "Content-Type: application/json"   -d '{"username":"username","email":"user@example.com","password":"strongpass"}'
 
 # Login
-curl -X POST http://127.0.0.1:8000/api/auth/login/   -H "Content-Type: application/json"   -d '{"email":"user@example.com","password":"strongpass"}'
+curl -X POST http://127.0.0.1:8000/api/auth/login/   -H "Content-Type: application/json"   -d '{"username":"username","password":"strongpass"}'
 ```
 
 ---
