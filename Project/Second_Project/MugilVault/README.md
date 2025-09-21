@@ -129,7 +129,7 @@ python manage.py runserver
 Available endpoints (summary):  
 
 ### Users (Authentication)  
-Base: `/api/users/`  
+Base: `/api/auth/`  
 - `POST /api/auth/register/` → create account  
 - `POST /api/auth/login/` → obtain JWT tokens  
 - `POST /api/auth/refresh/` → refresh token   
@@ -143,7 +143,7 @@ Base: `/api/files/`
 - `PATCH /api/files/<id>/` → update file name/metadata  
 - `DELETE /api/files/<id>/` → delete
 - `GET /api/files/usage/` → usage details
-- `GET /api/files/<id>/share/` → expirey link   
+- `GET /api/files/<id>/share/` → expiry link   
 
 ---
 
