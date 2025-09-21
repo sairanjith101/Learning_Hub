@@ -1,12 +1,11 @@
-# MugilVault – Secure Storage & User Management Backend (Django + DRF)
+# MugilVault – Cloud Storage System Backend (Django + DRF)
 
-![Python](https://img.shields.io/badge/python-3.11-blue)  
-![Django](https://img.shields.io/badge/django-5.x-green)  
-![DRF](https://img.shields.io/badge/DRF-3.x-red)  
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)  
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![Django](https://img.shields.io/badge/django-5.2-green)
+![DRF](https://img.shields.io/badge/DRF-3.x-red)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**MugilVault** is a Django + Django REST Framework backend designed for **secure storage operations** and **user account management**.  
-It provides APIs for authentication, file storage, and permission-based access control.  
+**MugilVault** is a secure, scalable cloud storage system built with Django and DRF. It provides user authentication and file management features with RESTful APIs.  
 
 This README covers setup, usage, API reference, environment variables, deployment notes, and dev tips.  
 
@@ -35,13 +34,12 @@ This README covers setup, usage, API reference, environment variables, deploymen
 
 ## Quick summary & features
 
-* Django 5.x project (`mugilvault`)  
-* Core modules:  
-  - **Users** → registration, JWT login, profile management  
-  - **Storage** → file uploads, secure access, permission system  
-* REST APIs with DRF + JWT (SimpleJWT)  
-* Swagger API docs included  
-* Media file storage under `/media/uploads/`  
+- User Registration and Authentication (JWT)
+- Upload, Download, Delete, Rename and List Files
+- Advanced Storage Features (see API docs)
+- Swagger & Redoc API documentation
+- Local media storage support (for development)
+- Easy API testing with Postman collection
 
 ---
 
@@ -49,9 +47,8 @@ This README covers setup, usage, API reference, environment variables, deploymen
 
 * **Backend:** Python 3.11, Django 5.x, Django REST Framework  
 * **Auth:** JWT (SimpleJWT)  
-* **Database:** SQLite (default) → can be swapped with MySQL/PostgreSQL  
-* **Docs:** Swagger / Postman collection  
-* **Testing:** Django test framework  
+* **Database:** MySQL → can be swapped with SQLite/PostgreSQL  
+* **Docs:** Swagger / Postman collection   
 
 ---
 
@@ -68,7 +65,6 @@ MugilVault/
 ├─ users/                 # user authentication & profiles
 ├─ storage/               # storage & permission-based access
 ├─ media/uploads/         # uploaded files
-├─ Doc/                   # extra docs (swagger, features, postman, etc.)
 └─ .gitignore
 ```
 
@@ -84,7 +80,6 @@ Key files:
 ## Initial setup
 
 ```bash
-cd MugilVault
 python -m venv .venv
 source .venv/bin/activate   # Linux/macOS
 .venv\Scripts\Activate.ps1  # Windows
@@ -104,7 +99,6 @@ DJANGO_DEBUG=True
 DB_ENGINE=sqlite3
 DB_NAME=db.sqlite3
 ALLOWED_HOSTS=localhost,127.0.0.1
-MEDIA_ROOT=media/
 ```
 
 ---
@@ -136,17 +130,20 @@ Available endpoints (summary):
 
 ### Users (Authentication)  
 Base: `/api/users/`  
-- `POST /api/users/register/` → create account  
-- `POST /api/users/login/` → obtain JWT tokens  
-- `POST /api/users/refresh/` → refresh token  
-- `GET|PUT /api/users/me/` → profile operations  
+- `POST /api/auth/register/` → create account  
+- `POST /api/auth/login/` → obtain JWT tokens  
+- `POST /api/auth/refresh/` → refresh token   
 
 ### Storage  
-Base: `/api/storage/`  
-- `POST /api/storage/upload/` → upload files  
-- `GET /api/storage/list/` → list uploaded files  
-- `GET /api/storage/<id>/` → retrieve single file info  
-- `DELETE /api/storage/<id>/` → delete file  
+Base: `/api/files/`  
+- `POST /api/files/` → upload  
+- `GET /api/files/` → list  
+- `GET /api/files/<id>/` → retrieve
+- `PUT /api/files/<id>/` → replace file
+- `PATCH /api/files/<id>/` → update file name/metadata  
+- `DELETE /api/files/<id>/` → delete
+- `GET /api/files/usage/` → usage details
+- `GET /api/files/<id>/share/` → expirey link   
 
 ---
 
