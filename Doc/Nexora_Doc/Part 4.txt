@@ -1,0 +1,250 @@
+--- Forward relation → ஒரு Order-லிருந்து அது எந்த User-க்கு சேர்ந்தது என்று தெரிஞ்சிக்கிறோம் (order.user).
+--- Reverse relation → ஒரு User-லிருந்து அவனுடைய எல்லா Orders-யும் எடுக்கிறோம் (user.orders.all(), related_name கொடுத்திருக்கோம்னா) — related_name கொடுக்கலைனா default-ஆ user.order_set.all().
+
+👉 Forward = “இந்த Order யாரோடது?”
+👉 Reverse = “இந்த User எத்தனை Orders போட்டிருக்கான்?”
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- order_set → Django default name (related_name கொடுக்கலானா கிடைக்கும்).
+--- related_name → நாம் கொடுக்கும் custom, readable name (best practice, must when multiple FKs).
+👉 Functionality ஒரே மாதிரி தான், but clarity & conflicts avoid பண்ண related_name use பண்ணுறோம்.
+
+--- இரண்டு User fields இருக்குது.
+--- Django எது order_set, எது வேற? → குழப்பம்!
+--- இதை avoid பண்ண, related_name must.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- OrderItem → subtotal (row-level total = qty × price).
+--- Order → grand total (sum of all items).
+--- அதனால total-ஐ OrderItem-ல வைக்க முடியாது → அது duplication & inconsistency உண்டாக்கும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- itemsன்னா “அந்த order-க்கு சேர்ந்த எல்லா OrderItem records”.
+--- அந்த items-லிருந்து subtotal எடுத்துச் சேர்த்தால்தான் Order.total கிடைக்கும்.
+--- அதனால related_name="items"ன்னு வைப்பது மிகவும் logical (ஒரு order = பல items).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1️⃣ CartViewSet-ஐ purpose
+
+--- CartViewSet என்பது user-க்கு shopping cart manage பண்ண பாவிக்கப்படும்.
+--- list → cart-ல உள்ள எல்லா items காட்டும்
+--- create → cart-க்கு புதிய item add பண்ணும் (அல்லது quantity update பண்ணும்)
+--- update → cart-ல் உள்ள item quantity change பண்ணும்
+--- destroy → cart-ல் உள்ள item remove பண்ணும்
+--- உதாரணமாக: user page-ல் “Add to Cart”, “Remove”, “Change quantity” செய்யும் functionality இது handle பண்ணும்.
+
+2️⃣ CheckoutViewSet-ஐ purpose
+
+--- CheckoutViewSet என்பது cart-ல இருந்த items-ஐ final order-ஆ convert பண்ண பாவிக்கப்படும்.
+--- Cart → Order-க்கு checkout செய்யும் function.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+| Feature | CartViewSet                   | CheckoutViewSet                               |
+| ------- | ----------------------------- | --------------------------------------------- |
+| Purpose | Cart-ல் items manage பண்ண             |    Cart → Order convert பண்ண                     |
+| Methods | list, create, update, destroy | create (checkout)                             |
+| Effect  | Cart-ல் மட்டும் இருக்கும்     	  | Order table-ல் save, stock reduce, cart clear |
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- CartViewSet = User-க்கு “Add/Remove/Change items in cart” functionality.
+--- CheckoutViewSet = User cart-ல இருந்த items-ஐ final order-ஆ save பண்ணி, stock reduce பண்ணும் function.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2️⃣ CheckoutViewSet-ஐ purpose
+
+--- CheckoutViewSet என்பது cart-ல இருந்த items-ஐ final order-ஆ convert பண்ண பாவிக்கப்படும்.
+--- Cart → Order-க்கு checkout செய்யும் function.
+
+Step by step:
+
+1. Cart check
+
+cart, _ = Cart.objects.get_or_create(user=request.user)
+if not cart.items.exists():
+    return Response({"error": "Cart is empty"}, status=400)
+
+--- Cart-ல் items இல்லா checkout செய்ய முடியாது.
+
+2. Create Order
+
+order = Order.objects.create(user=request.user, total=cart.total_price)
+
+--- Order table-ல ஒரு row create பண்ணுறது.
+--- total=cart.total_price → cart-ல உள்ள எல்லா items-ன் total sum.
+
+3. Create OrderItem rows
+
+for item in cart.items.all():
+    OrderItem.objects.create(
+        order=order,
+        product=item.product,
+        quantity=item.quantity,
+        price=item.product.price
+    )
+
+
+--- Cart-ல இருக்கும் ஒவ்வொரு item → OrderItem-ல save ஆகும்.
+
+--- ஒவ்வொரு product-க்கும் quantity & price snapshot save ஆகும்.
+
+4. Reduce stock
+
+item.product.stock -= item.quantity
+item.product.save()
+
+--- Actual product stock decrease பண்ணுறது, inventory maintain பண்ண.
+
+5. Clear cart
+
+cart.items.all().delete()
+
+--- Checkout-ஆ பண்ணும்போது cart-ல் items இருக்கக் கூடாது.
+
+6. Response
+
+return Response({"message": "Order placed successfully", "order_id": order.id}, status=201)
+
+--- User-க்கு order success message மற்றும் order ID காட்டும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- நாம _ use பண்ணுறது → created variable-ஐ ignore பண்ண
+
+cart, _ = Cart.objects.get_or_create(user=request.user)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1️⃣ Purpose of serializers
+
+--- Serializers → Django REST Framework (DRF)-ல model data-ஐ JSON (API response) format-க்கு மாற்றவும்,
+--- API request-ல இருந்து data validate பண்ணவும் உதவும்.
+
+👉 Model → JSON (output)
+👉 JSON → Model (input, create/update)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+| Serializer              | Purpose                                                           |
+| ----------------------- | ----------------------------------------------------------------- |
+| **OrderItemSerializer** | ஒவ்வொரு order item-ன் details JSON-ஆ output பண்ண                  |
+| **OrderSerializer**     | ஒரு order-ன் details + அதிலுள்ள items-ஐ nested JSON-ஆ output பண்ண |
+| **PaymentSerializer**   | order-க்கு ஆன payment details handle பண்ண                         |
+
+👉 read_only_fields → automatically generate values, user input-ல change பண்ண முடியாது
+👉 nested serializer → related objects (product, items) JSON-ல காட்ட
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class PaymentSerializer(serializers.ModelSerializer):
+    order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
+
+👉 order → ForeignKey to Order
+👉 PrimaryKeyRelatedField → API request-ல் order id அனுப்பும்போது validate பண்ணும்
+👉 queryset=Order.objects.all() →
+👉 அனுப்பிய order ID Order table-ல இருக்கிறதா check பண்ணும்
+👉 இல்லனா validation error return பண்ணும்
+
+👉 queryset is used to validate incoming related field values against database records.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+| Field                           | Reason for explicit serializer                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| `Meta.model = OrderItem`        | Serializer **base model** define பண்ணும் (quantity, price, product foreign key) |
+| `product = ProductSerializer()` | Nested object details-ஐ API-க்கு show பண்ண user-friendly format-ல் convert பண்ண |
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 QuerySet = the actual database records (in Python objects).
+👉 Serializer = the translator that turns those records into JSON (and back).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 OrderViewSet → Orders handle panna
+👉 PaymentViewSet → Payment handle panna
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def get_queryset(self):
+    user = self.request.user
+    if user.role == "ADMIN":
+        return Order.objects.all().order_by('-created_at')
+    return Order.objects.filter(user=user).order_by('-created_at')
+
+👉 If Admin → all orders return pannum.
+👉 Else → current logged-in user oda orders mattum return pannum.
+👉 Customer → thanoda orders mattum.
+👉 Admin → ellame.
+👉 Admin → ellaroda orders (full list) access panna mudiyum.
+👉 Customer (normal user) → thanoda orders mattum access panna mudiyum.
+👉 Seller → oru special case handle pannala, so default-ah seller ku Order.objects.filter(user=seller) fire aagum → but usually Order.user field customer ah point pannum, seller ah illa → so seller ku result empty varum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 created_at → order first time DB la save aana datetime.
+👉 auto_now_add=True na → row create aana odane Django automatically current datetime insert pannum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 Order object create pannuvathu customer.
+👉 Admin just view/edit panna mudiyum.
+👉 Seller ku direct order create panna chance illa (avanga role → product provide + fulfill order).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+serializer_class = OrderSerializer
+
+👉 Serializer is used for serialize (object → JSON) and deserialize (JSON → object), with validation in between.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 import uuid na Python built-in UUID (Universally Unique Identifier) module ah import pannuradhu.
+
+UUID na enna?
+
+👉 128-bit unique value generate pannum.
+👉 Random ah generate pannalum, practically duplicate varathu.
+
+Format:
+
+550e8400-e29b-41d4-a716-446655440000
+
+🔎 Django projects la uuid ethuku use pannuvanga?
+
+1. Primary Key / ID
+
+👉 Normal ah id = models.AutoField() use pannuvom.
+👉 But global unique ID venumna itha use pannuvanga
+👉 Order IDs / Payment IDs secure ah irukkum.
+
+2. Transaction ID / Reference Number
+
+👉 Example: Payment ku random unique reference number generate panna
+
+3. Security
+
+👉 Guess panna mudiyadha ID.
+👉 Example: /orders/1/ easy guess panna mudiyum.
+
+/orders/550e8400-e29b-41d4-a716-446655440000/ → hard to guess.
+
+✅ Short-a solla:
+👉 import uuid → unique IDs / transaction references generate panna use pannuranga.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔎 ViewSet
+
+👉 Base class.
+👉 Default-a CRUD methods provide pannaathu.
+👉 Neenga list(), create(), retrieve() methods ellam manual ah define pannikanum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔎 ModelViewSet
+
+👉 ViewSet + ModelSerializer + Queryset integration.
+👉 DRF already CRUD logic provide pannidum (list, retrieve, create, update, destroy).
+👉 Neenga queryset + serializer_class kudutha odane full CRUD API ready.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+try:
+            order = Order.objects.get(id=order_id, user=request.user)
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=404)
+
+        if order.status != Order.Status.PENDING:
+            return Response({"error": "Order already paid or processed"}, status=400)
+
+
+👉 Order ID DB la irukaa nu check pannum → Order.objects.get(id=order_id, user=request.user)
+👉 DB la illa na → 404 error return pannum (Order not found)
+👉 Order status check pannum → order.status == PENDING ah irukkaa nu
+👉 Pending ah irundha → payment process continue pannum
+👉 Pending illa na → 400 error return pannum (Order already paid or processed)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+txn_id = str(uuid.uuid4()) → random, unique transaction ID generate panna use pannuranga, payment tracking & security ku.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+| Part      | Role                                                                                 |
+| --------- | ------------------------------------------------------------------------------------ |
+| **Model** | Blueprint / template → “Payment table la columns enna irukkum nu”                    |
+| **View**  | Action → “User pay panna, new Payment row create pannitu order status update pannum” |
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 Models only structure, row create automatically illa.
+👉 Payment logic (validate order, check status, generate txn_id, mark success) → views la handle pannum.
+👉 Appo dynamic values (amount, order_id, txn_id) DB la save aagum.
+
+✅ Short version:
+
+👉 Model → defines Payment structure
+👉 View → executes actual creation of a payment record with real data during request
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+order_id = request.data.get("order_id")
+method = request.data.get("method", "Razorpay")
+amount = request.data.get("amount")
+
+👉 “Frontend la customer anupura payment data (order ID, amount, method) backend la eduthutu process panna use pannuradhu.”

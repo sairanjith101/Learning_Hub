@@ -19,6 +19,18 @@ from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.http import HttpResponse
+
+# Home view
+def home(request):
+    return HttpResponse("""
+        <h1>Welcome to Nexora!</h1>
+        <ul>
+            <li><a href="/swagger/" target="_blank">Swagger UI</a></li>
+            <li><a href="/redoc/" target="_blank">Redoc</a></li>
+            <li><a href="https://github.com/sairanjith101/Learning_Hub/tree/f72d36315c5ad2087be8fe237f9f28f3905cbfe3/Project/Nexora" target="_blank">GitHub Repository</a></li>
+        </ul>
+    """)
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -32,6 +44,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', home, name='home'),
     path('api/auth/', include('accounts.urls')),  
     path('api/catalog/', include('products.urls')),
     path('api/', include('cart.urls')),

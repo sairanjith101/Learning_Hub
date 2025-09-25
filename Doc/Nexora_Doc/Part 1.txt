@@ -1,0 +1,493 @@
+👉 1. Start with definitions
+--- Authentication is the process of verifying the identity of a user (ex: username & password, OTP, JWT token).
+--- Authorization is the process of checking what resources or actions the authenticated user is allowed to access (ex: admin can add users, normal user cannot).
+
+👉 2. Give real-world example
+--- Authentication → Logging into Gmail with email & password.
+--- Authorization → After login, only you can see your mails, not others’.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- Django → the web framework (core).
+--- DRF → builds APIs on top of Django.
+--- simplejwt → Its a package adds secure JWT authentication for those APIs.
+--- PyMySQL → connects Django to a MySQL database.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+JWT:
+
+--- JWT stands for JSON Web Token.
+--- It’s a compact, self-contained token used for authentication between client and server.
+--- It has three parts — header, payload, and signature.
+--- After login, the server issues a JWT, and the client sends it with each request.
+(👉 "User login ஆன பிறகு, server ஒரு JWT token குடுக்கும். அதுக்குப் பிறகு, client ஒவ்வொரு request அனுப்பும் போதும் அந்த JWT token-ஐ சேர்த்து server-க்கு அனுப்பும்.")
+--- Since it is stateless, the server doesn’t need to store sessions, which makes it scalable and fast.
+
+✅ (If they want more)
+--- The header defines algorithm, payload has user info and expiry, and the signature ensures the token is not tampered.
+
+✅ What is the meaning of compact in coding?
+--- In coding, compact means writing code or data in a shorter, claener and memory-efficent way.
+
+✅ What is the meaning of self-contained token in coding?
+--- A self-contained token is a token(like a JWT) that holds all the required user information inside itself,
+--- so the server doesn't need to look it up in a database.
+
+✅ What is the meaning of stateless in coding?
+--- Statelessn in coding means the server does not remember any information about the client between request.
+--- each request is independent.
+
+✅ What is the meaning of session in coding?
+--- A session is a way to store user data on the server(like login info) so it can be used accross multiple requests.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+👉 Structure:
+xxxxx.yyyyy.zzzzz → Header.Payload.Signature
+
+--- Header → algorithm & token type (ex: HS256).
+--- Payload → user info + claims (ex: user id, role, expiry time).
+--- Signature → ensures token is not tampered (generated using secret key).
+
+🔹 Important
+
+--- Header and Payload in JWT are Base64-encoded JSON.
+--- Signature is also Base64-encoded, but it’s generated using hashing + secret key.
+--- Anyone can decode Header & Payload, but only the server (with secret key) can verify Signature.
+
+👉 In short:
+
+--- Header + Payload = message
+--- Signature = seal 🔒 with server’s secret key
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🔹 Q: “What is Base64 and why does JWT use it?”
+
+--- Base64 is an encoding scheme that converts data into a text format using only A–Z, a–z, 0–9, +, /.
+--- It’s not encryption, just a safe way to represent data in text.
+--- JWT uses Base64 to encode the header and payload so they can be safely sent in HTTP headers.
+
+✅ (If they dig deeper)
+--- Anyone can decode Base64, but the signature ensures the JWT cannot be tampered with.
+
+⚡ Quick analogy:
+--- Base64 = Writing something in English → but instead of letters, you map it into a fixed alphabet system → machine-readable.
+--- Not secret, just transport-friendly.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. CREATE DATABASE nexora CHARACTER SET utf8mb4;
+
+--- What it does: Creates a new database named nexora.
+--- CHARACTER SET utf8mb4:
+--- Tells MySQL to use the utf8mb4 encoding, which is the modern and recommended choice.
+--- It supports all Unicode characters, including emojis (😀🔥💯), unlike utf8 which is limited.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2. CREATE USER 'nexora_user'@'%' IDENTIFIED BY 'StrongPassword123!';
+
+--- What it does: Creates a new database user called nexora_user.
+--- '%': The % means this user can connect from any host (not just localhost).
+--- If you only want local access, you’d use 'nexora_user'@'localhost'.
+--- IDENTIFIED BY 'StrongPassword123!': Sets the user’s password to StrongPassword123!.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3. GRANT ALL PRIVILEGES ON nexora.* TO 'nexora_user'@'%';
+
+--- What it does: Gives the user all permissions (create tables, insert, update, delete, etc.) on the nexora database.
+--- nexora.*: Means "all tables inside the nexora database".
+--- To 'nexora_user'@'%': Grants those rights specifically to the user you just created.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+4. FLUSH PRIVILEGES;
+
+--- What it does: Refreshes MySQL’s memory of users and privileges.
+--- Without this, MySQL might not immediately recognize the new user/permissions until restart.
+--- Think of it as "apply the changes now".
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In Database connect in Django (settings.py):
+
+--- 'OPTIONS': { 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'", }
+--- OPTIONS → Django oda DB connection-ku extra config.
+--- init_command → Connection aana udane oru SQL command run panna.
+--- STRICT_TRANS_TABLES → Safe mode ahh enable pannidum → invalid data DB la sneak in aagave koodadhu.
+
+🔹 Case 1: Wrong Integer
+--- INSERT INTO demo_table (age, name, dob) VALUES ('JHON', 'ABCD', '2025-01-01');
+
+--- STRICT_TRANS_TABLES ON: ❌ Error → Incorrect integer value: 'JHON' for column 'age'
+--- STRICT_TRANS_TABLES OFF: ✅ Insert → MySQL converts 'JHON' → 0
+
+🔹 Case 2: Too Long String
+--- INSERT INTO demo_table (age, name, dob) VALUES (25, 'JHONNY', '2025-01-01');
+
+
+--- STRICT ON: ❌ Error → Data too long for column 'name'
+--- STRICT OFF: ✅ Insert → 'JHONNY' becomes 'JHONN' (truncated to 5 chars)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Custom user model (roles)
+AUTH_USER_MODEL = 'accounts.User'
+
+✅ Model Answer (Short & Strong)
+
+--- In Django, AUTH_USER_MODEL lets us replace the default auth.User with our own custom User model.
+--- We do this mainly when we want more flexibility — for example:
+
+--- To use email instead of username as the login field
+--- To add extra fields like phone number, profile picture, or role,
+--- To support roles/permissions like admin, manager, customer,
+--- And to keep our project future-proof, since changing the user model later is difficult.
+--- That’s why we set AUTH_USER_MODEL = 'accounts.User' — so Django knows to use our custom model everywhere instead of the default.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+JWT tokens:
+
+--- Access token valid for 60 minutes.
+--- Refresh token valid for 7 days.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) class User(AbstractUser):
+
+--- AbstractUser = Django oda built-in User (username, email, password irukkum).
+--- Neenga extend pannitu extra fields add pannuringa (role, phone, address).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2) class Roles(models.TextChoices):
+
+--- Idhu oru enum (options list).
+--- ADMIN = 'ADMIN', 'Admin' →
+--- 'ADMIN' DB la save aagum.
+--- 'Admin' UI la kaattum.
+--- So, role oda possible values = ADMIN, SELLER, CUSTOMER.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3) role = models.CharField(...)
+
+--- Role nu oru field create pannuringa.
+--- choices=Roles.choices → dropdown maari 3 option mattum select panna mudiyum.
+--- default=Roles.CUSTOMER → pudhusaa user create pannumbodhu role = Customer automatically set aagum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+@admin.register(User)
+class UserAdmin(DjangoUserAdmin):
+
+--- @admin.register(User) = admin.site.register(User, UserAdmin) shortcut.
+--- UserAdmin inherits DjangoUserAdmin, so default user admin behaviour keep pannittu namma changes add pannalam.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Imports & setup:
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from rest_framework import serializers
+
+User = get_user_model()
+
+--- get_user_model() → neenga define pannirukkura custom User model-a fetch pannum (hard-coded import avoid agum).
+--- validate_password → Django built-in password strength checks (length, common password, etc.).
+--- DRF serializers → JSON <-> Python conversion + validation.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+RegisterSerializer:
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+    role = serializers.ChoiceField(choices=User.Roles.choices, default=User.Roles.CUSTOMER)
+
+--- ModelSerializer → auto fields + model-based save.
+--- password → write_only=True → response la varadhu (safety).
+--- required=True → must send during register.
+--- role → ChoiceField → ADMIN/SELLER/CUSTOMER mattum allow.
+--- default=CUSTOMER → user specify pannalana default-aa Customer.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+📌 Error summary:
+
+RuntimeError: 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+Cause:
+
+--- Your MySQL server user (nexora_user) is using the default authentication plugin caching_sha2_password.
+--- But your Python MySQL driver (PyMySQL) cannot handle it without the cryptography package.
+
+✅ Solution (two options)
+Option 1: Install cryptography
+
+--- In your venv, run:
+
+pip install cryptography
+
+--- Then try again:
+
+python manage.py makemigrations
+python manage.py migrate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--- User = get_user_model() கொடுத்தால் → அது உன் models.py-யில் இருக்கும் custom User model-ஐத்தான் எடுத்துக்கொள்ளும்.
+
+get_user_model()
+        ↓
+settings.py (AUTH_USER_MODEL)
+        ↓
+models.py (User class)
+        ↓
+Use that User model to get user details
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def create(self, validated_data):
+    password = validated_data.pop('password')
+    user = User(**validated_data)
+    user.set_password(password)
+    user.save()
+    return user
+
+Step by Step Explanation:
+
+1. password = validated_data.pop('password')
+
+--- validated_data என்பது user form/API-யில் அனுப்பிய data (அதாவது username, email, password, phone ... எல்லாம் dictionary போல இருக்கும்).
+
+Example:
+
+{
+    "username": "kumar",
+    "email": "kumar@example.com",
+    "password": "secret123",
+    "phone": "9876543210"
+}
+
+--- pop('password') என்றால் → அந்த dictionary-யிலிருந்து "password" field-ஐ எடுத்து, அதை password variable-ல் சேமிக்கும்.
+
+--- அதே சமயம் validated_data-யில் password key remove ஆகும்.
+
+Example:
+
+password = "secret123"
+validated_data = {
+    "username": "kumar",
+    "email": "kumar@example.com",
+    "phone": "9876543210"
+}
+
+2. user = User(**validated_data)
+
+--- இங்கே மீதமுள்ள data கொண்டு user object உருவாக்குறோம்.
+
+--- **validated_data என்பதால dictionary keys-ஐ model fields-க்கு map பண்ணும்.
+
+Example:
+
+user = User(username="kumar", email="kumar@example.com", phone="9876543210")
+
+
+--- இந்த நேரத்தில் password இன்னும் set ஆகவில்லை ❌.
+
+3. user.set_password(password)
+
+--- இங்கே தான் முக்கியமானது ✅
+
+--- password-ஐ direct-ஆ user.password = "secret123" என்று போடக்கூடாது (அப்படிச் செய்தால் plain text DB-ல save ஆகிடும் → மிகவும் unsafe ❌).
+
+--- set_password() method password-ஐ hash (encrypt போல) பண்ணி user.password field-ல் சேமிக்கிறது.
+
+Example:
+
+"secret123" → "pbkdf2_sha256$260000$Yh…." (long hashed string)
+
+4. user.save()
+
+--- இப்போ user object database-ல save ஆகிறது.
+
+--- அதாவது புதிய row user table-ல insert ஆகும்.
+
+5. return user
+
+--- save ஆன user object-ஐ திரும்ப return பண்ணும்.
+
+--- இதனால API-க்கு அந்த புதிய user data response-ஆக கிடைக்கும் (password காட்டாமல்).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+views.py
+
+--- RegisterView → anyone can POST செய்து புதிய user create பண்ணலாம்.
+--- MeView → login ஆன user தான் /auth/me/ மூலம் தன் profile-ஐ GET/UPDATE பண்ணலாம்.
+
+--- get_user_model() → project-ல define பண்ணிய custom User model (அல்லது default User) எதையோ எடுத்து தரும். இதனால் future-ல User model மாற்றினாலும் code break ஆகாது.
+
+--- generics → DRF-ல common CRUD views ready-made. நீங்க minimal code-ல் endpoints build பண்ண முடியும்.
+--- permissions → யாருக்கு access கொடுக்கணும் (AllowAny vs IsAuthenticated) control பண்ண.
+--- CreateAPIView → POST request வந்தா புதிய object create பண்ணும் (இங்க உங்க User).
+--- queryset → DRF-க்கு base queryset. (Create-க்கு mostly பயன்படுத்தது serializer.save() தான்; ஆனாலும் DRF சில இடங்களில் use பண்றது.)
+--- serializer_class = RegisterSerializer → form-மாதிரி வேலை செய்யும். validate பண்ணி, create()-ல User.objects.create_user(...) என்று password-ஐ hash பண்ணி சேமிக்கணும் (ப்ளெயின் டெக்ஸ்ட்-ஆ save பண்ணக் கூடாது!).
+
+--- permission_classes = AllowAny → யாரும் (login இல்லாமே) register செய்யலாம்.
+--- RetrieveUpdateAPIView → GET (தன் profile-ஐ retrieve) மற்றும் PUT/PATCH (update) support.
+
+--- IsAuthenticated → login ஆனவங்க மட்டும் access பண்ண முடியும்.
+--- get_object() → எந்த user object-ஐ எடுத்துப் பண்றது? → request.user (அதாவது தற்போது login ஆன user).
+--- இதனால் /auth/me/-ல id pass பண்ணணும்-ன்னு தேவையில்லை. “நான்” யார்-னு server-க்கு தெரியும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Why GenericAPIView is better?
+
+--- Less code (boilerplate avoid)
+--- Consistency (error handling, status codes DRF standard போல வரும்)
+--- Flexibility (எதாவது customize பண்ணணும்-னா override methods like perform_create, get_queryset, get_object)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Client side (browser / mobile app):
+
+--- Request & Response → JSON format
+--- Because network-la communicate panna standard format JSON.
+
+Server side (Django/DRF + DB):
+
+--- JSON → Python objects (dict / model instances) → ORM query → DB rows
+--- DB la Python data store aagathu, SQL table-oda rows & columns save aagum.
+--- Later DB-la irundhu record fetch pannumbodhu → Python objects → JSON convert pannitu client-ku send pannum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🔄 Full Cycle
+
+--- Client → JSON request
+--- Example Request:
+
+{
+  "username": "ram",
+  "email": "ram@example.com"
+}
+
+
+--- Server → Python world
+--- JSON → Python dict
+--- Serializer validate pannum
+--- ORM model (User instance) create/update pannum
+--- ORM → SQL query → DB row save
+--- Response → JSON
+--- DB record fetch → Python object → Serializer serialize → JSON
+--- Return to client
+Example Response:
+
+{
+  "id": 1,
+  "username": "ram",
+  "email": "ram@example.com"
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Serializer-oda role
+
+--- Serializer-oda main job:
+--- Validate (JSON → Python dict)
+--- Transform (Python object ↔ JSON)
+--- Save logic (create/update DB records)
+--- But serializer itself request/response handle pannaathu.
+--- It won’t know:
+--- User GET ku vandhacha? POST ku vandhacha?
+--- Yaaru permission kidaikkum?
+--- Status code 200 ah? 201 ah? 400 ah?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2. View-oda role
+
+--- View is the controller:
+--- Client request type (GET/POST/PATCH/DELETE) decide pannum → CRUD decide pannum
+--- Correct serializer call pannum
+--- Permission check pannum (IsAuthenticated, AllowAny, etc.)
+--- Response object build pannum (Response(serializer.data, status=201))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+📝 Short answer
+
+--- Request & Response → View handle pannum
+--- Serializer → just data validation + conversion
+--- DB → actual storage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. GenericAPIView
+
+from rest_framework import generics
+
+--- GenericAPIView-oda ready-made subclasses.
+--- CRUD operations (Create, Retrieve, Update, Delete) common-ah irukkura code DRF already implement panniduchu.
+
+Examples:
+
+--- generics.CreateAPIView → POST (create new object) handle pannum
+--- generics.RetrieveAPIView → GET (single object fetch) handle pannum
+--- generics.UpdateAPIView → PUT/PATCH (update) handle pannum
+--- generics.DestroyAPIView → DELETE handle pannum
+--- generics.RetrieveUpdateAPIView → GET + PUT/PATCH
+--- generics.RetrieveUpdateDestroyAPIView → GET + PUT/PATCH + DELETE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2. permissions
+
+from rest_framework import permissions
+
+--- யாருக்கு இந்த view access பண்ண முடியும்னு control pannum.
+--- permission_classes என்ற variable set pannalaam.
+
+Common permissions:
+
+--- permissions.AllowAny → யாரும் (login இல்லாம) access panna mudiyum.
+--- permissions.IsAuthenticated → login ஆன user மட்டும் access panna mudiyum.
+--- permissions.IsAdminUser → admin/staff மட்டும் access panna mudiyum.
+--- Custom permission class kooda create pannalaam (உதா: “owner only”).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3. Response
+
+from rest_framework.response import Response
+
+--- இது தான் final-ah client-க்கு data return பண்ணுறது.
+--- Python dict/serializer data pass panninaa, DRF அதை JSON-ஆ convert பண்ணி send pannum.
+
+Example:
+
+return Response({"message": "User created"}, status=201)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--- generics → ready-made CRUD class views (easy, less code).
+
+--- permissions → யாருக்கு இந்த API access கொடுக்கணும்னு control.
+
+--- Response → final output JSON format-la client-க்கு return pannum.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+📝 Short Summary
+
+--- User → The model class (DB table definition).
+--- request.user → The actual logged-in user instance for the current request.
+--- In get_object() → we need “which object to retrieve/update?” → that is the logged-in user only → so we return self.request.user.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🔑 1. Why use TokenObtainPairView & TokenRefreshView?
+
+--- TokenObtainPairView → username/password kuduthaa access + refresh token pair return pannum.
+
+--- Access token = short-life (5 min default).
+--- Refresh token = long-life (1 day default).
+
+--- TokenRefreshView → refresh token kuduthu pudhusa access token vaangalaam.
+👉 இதனால login/refresh JWT token cycle ready-made-ஆ கிடைக்குது.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+rest_framework_simplejwt.views import additionals list
+
+--- TokenVerifyView - Purpose: Oru token valid-ஆ இல்லையா check பண்ண.
+--- TokenBlacklistView (if blacklisting enabled in settings) - Purpose: Logout செய்யும்போது refresh token-ஐ blacklist பண்ண.
+--- TokenObtainSlidingView & TokenRefreshSlidingView
+	*** Sliding tokens என்ற JWT alternate system.
+	*** Difference: refresh token இல்லாமே, ஒரே sliding token rotate ஆகும்.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+🎯 Summary (புரிய எளிதாக)
+
+--- Login → TokenObtainPairView
+--- username/password குடுத்து → access + refresh tokens கிடைக்கும்
+
+--- Refresh → TokenRefreshView
+--- refresh குடுத்து → புதிய access token கிடைக்கும்
+
+--- Verify → TokenVerifyView
+--- token validதானா expiredஆனா check பண்ணும்
+
+--- Logout → TokenBlacklistView
+--- refresh token-ஐ blacklist பண்ணும் (மீண்டும் use பண்ண முடியாது)
+
+--- Sliding system → TokenObtainSlidingView, TokenRefreshSlidingView
+--- one-token system (refresh இல்லாமல் rotate ஆகும்)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
