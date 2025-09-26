@@ -40,6 +40,10 @@ This README covers setup, usage, API reference, environment variables, deploymen
 - Swagger & Redoc API documentation
 - Local media storage support (for development)
 - Easy API testing with Postman collection
+- Storage quota enforcement (per user, configurable)
+- Automatic old file cleanup on update
+- Rename support with safe storage handling
+- Generate temporary (5 min expiry) shareable links (S3 presigned URLs or local links)
 
 ---
 
@@ -142,8 +146,10 @@ Base: `/api/files/`
 - `PUT /api/files/<id>/` → replace file
 - `PATCH /api/files/<id>/` → update file name/metadata  
 - `DELETE /api/files/<id>/` → delete
-- `GET /api/files/usage/` → usage details
-- `GET /api/files/<id>/share/` → expiry link   
+
+### Storage Advanced Features  
+- `GET /api/files/usage/` → get storage usage, quota, and remaining space  
+- `GET /api/files/<id>/share/` → generate secure temporary share link
 
 ---
 
@@ -163,7 +169,10 @@ curl -X POST http://127.0.0.1:8000/api/auth/login/   -H "Content-Type: applicati
 
 * Add `.gitignore` (exclude `venv/`, `.env`, `__pycache__/`, `*.pyc`, `logs/`)  
 * Uploaded files stored in `/media/uploads/` (configure `MEDIA_ROOT` in `.env`)  
-* JWT settings can be tuned in `settings.py`  
+* JWT settings can be tuned in `settings.py`
+* File updates automatically remove old versions to prevent storage leaks
+* Quota validation ensures users cannot exceed allocated storage
+* S3 presigned URLs allow secure time-limited file sharing
 
 ---
 
