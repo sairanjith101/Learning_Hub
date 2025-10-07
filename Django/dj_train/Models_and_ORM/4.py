@@ -11,7 +11,6 @@
 # `OneToOneField`: One record in one model is linked to one record in another model.
 #   Example: One user has one profile.
 
-from django import models
 
 from django.db import models
 
@@ -41,16 +40,20 @@ class Student(models.Model):
 from django.db import models
 
 class Course(models.Model):
-    title = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 
 class Student(models.Model):
-    name = models.CharField(max_length=50)
-    courses = models.ManyToManyField(Course, through='Enrollment')
+    name = models.CharField(max_length=100)
+    # ManyToMany relationship between Student and Course
+    courses = models.ManyToManyField(Course, related_name='students')
 
-class Enrollment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    joined_date = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.name
+
 
 # `on_delete=models.CASCADE` means if the related object is deleted, this object will also be deleted.
 # Django handles these relationships and creates proper join tables in the database.

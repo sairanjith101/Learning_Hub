@@ -34,3 +34,19 @@ To create a new Django project and app:
        ...
        'app_name',
    ]
+
+
+
+Theory Qustions:
+
+Django:
+
+    • Django is a high-level Python framework that makes web development fast, secure, and scalable. It follows the MVT pattern and comes with powerful built-in features like ORM, authentication, and an admin panel, which help developers focus more on business logic than repetitive tasks. 
+
+Virtual environment :
+
+    • A virtual environment is a separate space for a Python project where you can install packages without affecting other projects.
+
+PIP:
+
+    • pip is a tool in Python used to install and manage packages or libraries for your projects.

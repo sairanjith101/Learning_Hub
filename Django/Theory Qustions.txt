@@ -1,0 +1,6 @@
+Django Coding Interview Questions List
+
+1. Django Basics & Setup
+	* What is Django?
+	* what is venv?
+	* 
