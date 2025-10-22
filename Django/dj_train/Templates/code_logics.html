@@ -1,0 +1,67 @@
+{% comment %} 2. How do you pass data from a view to a template? {% endcomment %}
+
+{% comment %} views.py {% endcomment %}
+from django.shortcuts import render
+
+def greet_user(request):
+    context = {'name': 'Ranjith'}
+    return render(request, 'greeting.html', context)
+
+<!-- greeting.html -->
+<h1>Hello, {{ name }}!</h1>
+
+{% comment %} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {% endcomment %}
+
+{% comment %} 3. How to use template tags and filters? {% endcomment %}
+
+Example Tags:
+{% if user.is_authenticated %}
+  Welcome, {{ user.username }}!
+{% else %}
+  Please log in.
+{% endif %}
+
+{% for item in items %}
+  <p>{{ item }}</p>
+{% endfor %}
+
+Example Filters:
+{{ name|upper }}      {# converts name to uppercase #}
+{{ date|date:"Y-m-d" }} {# formats date #}
+{{ text|truncatechars:50 }} {# limits characters #}
+
+{% comment %} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {% endcomment %}
+
+{% comment %} 4. Explain template inheritance in Django. {% endcomment %}
+
+{% comment %} base.html {% endcomment %}
+<html>
+  <head>
+    <title>{% block title %}My Site{% endblock %}</title>
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+  </body>
+</html>
+
+{% comment %} home.html {% endcomment %}
+
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+  <h1>Welcome to Home Page</h1>
+{% endblock %}
+
+{% comment %} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {% endcomment %}
+
+{% comment %} 5. How to include static files (CSS, JS, images) in templates? {% endcomment %}
+
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<script src="{% static 'js/app.js' %}"></script>
+<img src="{% static 'images/logo.png' %}" alt="Logo">
+
+
