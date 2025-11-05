@@ -12,6 +12,6 @@ class Solution:
                 return key
         return -1
 
-str = "aabb"
+str = "swiss"
 sol = Solution()
 print(sol.First_Non_Repeating_Char(str))
